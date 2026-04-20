@@ -532,15 +532,15 @@
     #map-wrap { width: 100%; }
     .leaflet-bottom.leaflet-left { display: none; }
     #sidebar-toggle {
-      position: fixed !important;
-      top: 14px !important;
-      right: 14px !important;
-      left: auto !important;
+      position: absolute !important;
+      top: 20px !important;
+      left: -52px !important;
       transform: none !important;
       z-index: 1100;
-      --md-filled-icon-button-container-size: 48px;
-      --md-filled-icon-button-icon-size: 22px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+      border-radius: 8px 0 0 8px !important;
+      --md-filled-icon-button-container-size: 52px;
+      --md-filled-icon-button-icon-size: 24px;
+      box-shadow: -3px 2px 8px rgba(0,0,0,0.2) !important;
     }
   }
 
@@ -2253,18 +2253,13 @@ function toggleSidebar() {
   var sidebar = document.getElementById('sidebar');
   var btn     = document.getElementById('sidebar-toggle');
   var collapsed = sidebar.classList.toggle('collapsed');
-  var isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    btn.innerHTML = collapsed ? '&#9776;' : '&#10005;';
-  } else {
-    btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
-  }
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
   setTimeout(function() { map.invalidateSize(); }, 260);
 }
 
 // Set correct initial icon on mobile
 if (window.innerWidth <= 768) {
-  document.getElementById('sidebar-toggle').innerHTML = '&#10005;';
+  document.getElementById('sidebar-toggle').innerHTML = '&#9654;';
 }
 
 // =====================================================================
