@@ -45,9 +45,16 @@
     #sidebar {
       width: 300px; min-width: 260px;
       background: #16213e;
-      display: flex; flex-direction: column;
       border-left: 2px solid #e06c00;
-      overflow: hidden;
+      position: relative;
+      overflow: visible;
+      transition: width 0.25s, min-width 0.25s;
+      flex-shrink: 0;
+    }
+    #sidebar.collapsed { width: 0 !important; min-width: 0 !important; border: none; }
+    #sidebar-inner {
+      display: flex; flex-direction: column;
+      height: 100%; overflow: hidden; width: 300px;
     }
 
     .s-head {
@@ -368,7 +375,7 @@
 
     /* -- SIDEBAR TOGGLE (mobile) -------------------------------------- */
     #sidebar-toggle {
-      display: none;
+      display: block;
       position: absolute; top: 50%; left: -18px;
       transform: translateY(-50%);
       z-index: 1000;
@@ -381,7 +388,6 @@
       transition: background 0.15s;
     }
     #sidebar-toggle:hover { background: #1e3050; }
-    #sidebar.collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; border: none; }
 
     /* -- SHARE TOAST -------------------------------------------------- */
     #share-toast {
@@ -554,6 +560,7 @@
 <!-- SIDEBAR -->
 <div id="sidebar">
   <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9664;</button>
+  <div id="sidebar-inner">
   <div class="s-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
     <div>
       <h1>East Fort Rock OHV</h1>
@@ -690,7 +697,8 @@
     </div>
     <div id="route-list"></div>
   </div>
-</div>
+  </div><!-- /sidebar-inner -->
+</div><!-- /sidebar -->
 
 <script>
 // =====================================================================
@@ -1984,7 +1992,7 @@ function toggleSidebar() {
   var btn     = document.getElementById('sidebar-toggle');
   var collapsed = sidebar.classList.toggle('collapsed');
   btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
-  setTimeout(function() { map.invalidateSize(); }, 300);
+  setTimeout(function() { map.invalidateSize(); }, 260);
 }
 
 // =====================================================================
