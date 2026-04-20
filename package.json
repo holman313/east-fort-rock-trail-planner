@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  }
+}
