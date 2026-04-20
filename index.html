@@ -366,6 +366,73 @@
     .diff-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .diff-row-val { font-size: 10px; color: #99aabb; }
 
+    /* -- SIDEBAR TOGGLE (mobile) -------------------------------------- */
+    #sidebar-toggle {
+      display: none;
+      position: absolute; top: 50%; left: -18px;
+      transform: translateY(-50%);
+      z-index: 1000;
+      background: #0f3460; color: #e06c00;
+      border: 2px solid #e06c00; border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; line-height: 32px; text-align: center;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.4);
+      transition: background 0.15s;
+    }
+    #sidebar-toggle:hover { background: #1e3050; }
+    #sidebar.collapsed { width: 0 !important; min-width: 0 !important; overflow: hidden; border: none; }
+
+    /* -- SHARE TOAST -------------------------------------------------- */
+    #share-toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      background: #0f3460; border: 1px solid #e06c00;
+      color: #e8edf5; font-size: 12px;
+      padding: 8px 18px; border-radius: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 20000;
+    }
+    #share-toast.show { opacity: 1; }
+
+    /* -- GPX IMPORT --------------------------------------------------- */
+    #gpx-import-bar {
+      display: none;
+      background: #0a1a2a; border-bottom: 1px solid #1e3050;
+      padding: 6px 14px;
+      display: none; align-items: center; justify-content: space-between;
+      font-size: 11px; color: #7a91b0;
+    }
+    #gpx-import-bar.visible { display: flex; }
+    #gpx-import-bar button {
+      background: none; border: none; color: #e74c3c;
+      font-size: 11px; cursor: pointer; padding: 0;
+    }
+    #gpx-import-bar button:hover { color: #ff6b6b; }
+
+    /* -- WAYPOINTS ---------------------------------------------------- */
+    .waypoint-row {
+      display: flex; align-items: center;
+      gap: 6px; margin-bottom: 5px;
+    }
+    .waypoint-icon-label {
+      font-size: 10px; flex-shrink: 0;
+    }
+    .waypoint-name {
+      flex: 1; font-size: 11px; color: #c8d5e8;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .waypoint-coords { font-size: 10px; color: #3a5070; flex-shrink: 0; }
+    .waypoint-del {
+      background: none; border: none; color: #334e6a;
+      cursor: pointer; font-size: 14px; padding: 0;
+      transition: color 0.12s; flex-shrink: 0;
+    }
+    .waypoint-del:hover { color: #e74c3c; }
+    .waypoint-mode-active { background: #1e5c1e !important; color: #2ecc71 !important; }
+
     /* -- CONTEXT MENU ------------------------------------------------- */
     #ctx-menu {
       display: none;
@@ -427,6 +494,12 @@
       background: #3a1010;
       color: #ff6b6b;
     }
+  @media (max-width: 768px) {
+    #sidebar { position: absolute; right: 0; top: 0; bottom: 0; z-index: 900; transition: width 0.25s; }
+    #sidebar-toggle { display: block; }
+    #sidebar.collapsed #sidebar-toggle { left: -18px; }
+    #map-wrap { width: 100%; }
+  }
   </style>
 </head>
 <body>
@@ -441,6 +514,8 @@
     <div class="login-error" id="login-err">Incorrect password</div>
   </div>
 </div>
+
+<div id="share-toast">Link copied to clipboard!</div>
 
 <!-- MAP -->
 <div id="map-wrap">
@@ -478,6 +553,7 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar">
+  <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9664;</button>
   <div class="s-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
     <div>
       <h1>East Fort Rock OHV</h1>
@@ -571,6 +647,28 @@
       <button class="btn btn-ghost" onclick="clearRoute()">&#10005; Clear</button>
       <button class="btn btn-orange" onclick="exportGPX()">&#11015; GPX</button>
     </div>
+    <div class="btn-row" style="margin-top:5px;">
+      <button class="btn btn-ghost" onclick="shareRoute()" title="Copy shareable link">&#128279; Share</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('gpx-file-input').click()" title="Import GPX track">&#8645; Import GPX</button>
+      <input type="file" id="gpx-file-input" accept=".gpx" style="display:none" onchange="importGPX(this)">
+    </div>
+  </div>
+
+  <!-- GPX import bar -->
+  <div id="gpx-import-bar">
+    <span id="gpx-import-label">GPX track loaded</span>
+    <button onclick="clearGPXImport()">&#10005; Remove</button>
+  </div>
+
+  <!-- Waypoints -->
+  <div class="s-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+      <div class="s-title" style="margin-bottom:0;">&#128205; Waypoints</div>
+      <button id="waypoint-mode-btn" class="btn btn-ghost"
+              style="font-size:10px;padding:3px 8px;flex:none;"
+              onclick="toggleWaypointMode()">+ Add</button>
+    </div>
+    <div id="waypoint-list"></div>
   </div>
 
   <!-- Saved routes -->
@@ -1093,6 +1191,8 @@ function renderAll(segs) {
   renderSavedRoutes();
   renderGarage();
   renderRangeWarning();
+  renderWaypoints();
+  loadRouteFromHash();
 }
 
 // =====================================================================
@@ -1707,6 +1807,184 @@ function renderRangeWarning() {
       '<span style="font-size:10px;color:#7a91b0;">' + routeMiles.toFixed(1) + ' mi planned</span>' +
       '<span style="font-size:10px;color:#7a91b0;">' + Math.round(limiting.range) + ' mi range &middot; ' + pctDisplay + '%</span>' +
     '</div>';
+}
+
+// =====================================================================
+// SHAREABLE ROUTE LINKS
+// =====================================================================
+function shareRoute() {
+  if (!routeOrder.length) {
+    alert('Build a route first, then share it.');
+    return;
+  }
+  var segIds = routeOrder.map(function(id) {
+    var seg = allSegsMap.get(id);
+    return seg ? seg.segId : null;
+  }).filter(Boolean);
+
+  var base = window.location.href.split('#')[0];
+  var url  = base + '#route=' + encodeURIComponent(segIds.join(','));
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(showShareToast);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showShareToast();
+  }
+}
+
+function showShareToast() {
+  var t = document.getElementById('share-toast');
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function loadRouteFromHash() {
+  var hash = window.location.hash;
+  if (!hash || hash.indexOf('#route=') !== 0) return;
+  var encoded = hash.slice(7);
+  var segIds;
+  try { segIds = decodeURIComponent(encoded).split(','); } catch(e) { return; }
+  clearRoute();
+  segIds.forEach(function(segId) {
+    var seg = allSegs.find(function(s) { return s.segId === segId; });
+    if (seg) toggleSegment(seg);
+  });
+}
+
+// =====================================================================
+// GPX IMPORT
+// =====================================================================
+var gpxImportLayer = null;
+
+function importGPX(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var parser = new DOMParser();
+      var xml = parser.parseFromString(e.target.result, 'application/xml');
+      var trkpts = xml.querySelectorAll('trkpt');
+      if (!trkpts.length) { alert('No track points found in GPX file.'); return; }
+      var latlngs = Array.from(trkpts).map(function(pt) {
+        return [parseFloat(pt.getAttribute('lat')), parseFloat(pt.getAttribute('lon'))];
+      });
+      clearGPXImport();
+      gpxImportLayer = L.polyline(latlngs, {
+        color: '#a855f7', weight: 3, opacity: 0.8,
+        dashArray: '6 4', interactive: false,
+      }).addTo(map);
+      var bar = document.getElementById('gpx-import-bar');
+      document.getElementById('gpx-import-label').textContent =
+        file.name + ' — ' + trkpts.length + ' points';
+      bar.classList.add('visible');
+      map.fitBounds(gpxImportLayer.getBounds(), { padding: [20, 20] });
+    } catch(err) {
+      alert('Could not parse GPX file: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function clearGPXImport() {
+  if (gpxImportLayer) { map.removeLayer(gpxImportLayer); gpxImportLayer = null; }
+  document.getElementById('gpx-import-bar').classList.remove('visible');
+}
+
+// =====================================================================
+// USER WAYPOINTS
+// =====================================================================
+var waypointModeActive = false;
+var waypointGroup = L.layerGroup().addTo(map);
+
+function getWaypoints() {
+  try { return JSON.parse(localStorage.getItem('efr_waypoints') || '[]'); } catch(e) { return []; }
+}
+function saveWaypointsStorage(arr) {
+  localStorage.setItem('efr_waypoints', JSON.stringify(arr));
+}
+
+function toggleWaypointMode() {
+  waypointModeActive = !waypointModeActive;
+  var btn = document.getElementById('waypoint-mode-btn');
+  if (waypointModeActive) {
+    btn.textContent = '✕ Cancel';
+    btn.classList.add('waypoint-mode-active');
+    map.getContainer().style.cursor = 'crosshair';
+  } else {
+    btn.textContent = '+ Add';
+    btn.classList.remove('waypoint-mode-active');
+    map.getContainer().style.cursor = '';
+  }
+}
+
+map.on('click', function(e) {
+  if (!waypointModeActive) return;
+  var name = prompt('Waypoint name:', 'Waypoint');
+  if (!name) { toggleWaypointMode(); return; }
+  var wpts = getWaypoints();
+  wpts.push({ lat: e.latlng.lat, lng: e.latlng.lng, name: name.trim() });
+  saveWaypointsStorage(wpts);
+  toggleWaypointMode();
+  renderWaypoints();
+});
+
+function deleteWaypoint(idx) {
+  var wpts = getWaypoints();
+  wpts.splice(idx, 1);
+  saveWaypointsStorage(wpts);
+  renderWaypoints();
+}
+
+function renderWaypoints() {
+  waypointGroup.clearLayers();
+  var wpts = getWaypoints();
+  var list = document.getElementById('waypoint-list');
+
+  wpts.forEach(function(wp, i) {
+    var icon = L.divIcon({
+      className: '',
+      html: '<div style="background:#e06c00;color:#fff;border:2px solid #fff;border-radius:50% 50% 50% 0;' +
+            'width:20px;height:20px;transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,0.5);">' +
+            '</div><div style="font-size:9px;font-weight:700;color:#fff;text-shadow:1px 1px 2px #000;' +
+            'white-space:nowrap;margin-top:2px;text-align:center;">' + wp.name + '</div>',
+      iconAnchor: [10, 20],
+    });
+    L.marker([wp.lat, wp.lng], { icon: icon })
+      .bindTooltip('<b>' + wp.name + '</b>', { className: 'tip-trail', direction: 'top', offset: [0, -22] })
+      .addTo(waypointGroup);
+  });
+
+  if (!list) return;
+  if (!wpts.length) {
+    list.innerHTML = '<div style="font-size:10px;color:#3a5070;text-align:center;padding:4px 0;">Click "+ Add" then tap the map</div>';
+    return;
+  }
+  list.innerHTML = wpts.map(function(wp, i) {
+    return '<div class="waypoint-row">' +
+      '<span class="waypoint-icon-label">&#128205;</span>' +
+      '<span class="waypoint-name" title="' + wp.name + '">' + wp.name + '</span>' +
+      '<button class="waypoint-del" onclick="deleteWaypoint(' + i + ')" title="Delete">&#10005;</button>' +
+    '</div>';
+  }).join('');
+}
+
+// =====================================================================
+// SIDEBAR TOGGLE
+// =====================================================================
+function toggleSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var btn     = document.getElementById('sidebar-toggle');
+  var collapsed = sidebar.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
+  setTimeout(function() { map.invalidateSize(); }, 300);
 }
 
 // =====================================================================
