@@ -4,17 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>East Fort Rock OHV Trail Planner</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e06c00">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="EFR Trails">
+  <link rel="apple-touch-icon" href="icon-192.svg">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script type="module" src="https://esm.run/@material/web/all.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
       display: flex;
       height: 100vh;
       overflow: hidden;
-      background: #111827;
+      background: #f0f2f5;
     }
 
     /* -- MAP ---------------------------------------------------------- */
@@ -23,15 +32,15 @@
 
     #loading-overlay {
       position: absolute; inset: 0;
-      background: rgba(10, 20, 40, 0.82);
+      background: rgba(240,242,245,0.88);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      z-index: 9999; color: #fff;
+      z-index: 9999; color: #333;
       backdrop-filter: blur(2px);
     }
     .spinner {
       width: 44px; height: 44px;
-      border: 4px solid rgba(255,255,255,0.15);
+      border: 4px solid rgba(0,0,0,0.08);
       border-top-color: #e06c00;
       border-radius: 50%;
       animation: spin 0.75s linear infinite;
@@ -39,41 +48,41 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     #load-title  { font-size: 15px; font-weight: 700; }
-    #load-status { font-size: 12px; color: #99aabb; margin-top: 6px; }
+    #load-status { font-size: 12px; color: #888; margin-top: 6px; }
 
     /* -- SIDEBAR ------------------------------------------------------ */
     #sidebar {
       width: 300px; min-width: 260px;
-      background: #16213e;
+      background: #ffffff;
       border-left: 2px solid #e06c00;
+      box-shadow: -2px 0 12px rgba(0,0,0,0.08);
       position: relative;
       overflow: visible;
       transition: width 0.25s, min-width 0.25s;
       flex-shrink: 0;
     }
-    #sidebar.collapsed { width: 0 !important; min-width: 0 !important; border: none; }
+    #sidebar.collapsed { width: 0 !important; min-width: 0 !important; border: none; box-shadow: none; }
     #sidebar-inner {
       display: flex; flex-direction: column;
       height: 100%; overflow: hidden; width: 300px;
     }
 
     .s-head {
-      background: #0f3460;
+      background: #e06c00;
       padding: 14px 16px;
-      border-bottom: 2px solid #e06c00;
     }
     .s-head h1 { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
-    .s-head p  { font-size: 11px; color: #7a91b0; margin-top: 3px; }
+    .s-head p  { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 3px; }
 
     #error-bar {
-      background: #7f1d1d; color: #fca5a5;
+      background: #fef2f2; color: #b91c1c;
       padding: 8px 14px; font-size: 12px;
-      display: none; border-bottom: 1px solid #991b1b;
+      display: none; border-bottom: 1px solid #fecaca;
     }
 
     .s-section {
       padding: 12px 14px;
-      border-bottom: 1px solid #1e3050;
+      border-bottom: 1px solid #e8e8e8;
     }
     .s-title {
       font-size: 10px; font-weight: 700;
@@ -89,15 +98,15 @@
     }
     .f-row input[type="checkbox"] { accent-color: #e06c00; cursor: pointer; }
     .f-swatch { width: 26px; height: 5px; border-radius: 3px; flex-shrink: 0; }
-    .f-label { font-size: 12px; color: #c8d5e8; }
+    .f-label { font-size: 12px; color: #333; }
 
     /* Restore deleted button */
     #restore-deleted-btn {
       display: none;
       margin-top: 8px;
       background: none;
-      border: 1px solid #2a4070;
-      color: #99aabb;
+      border: 1px solid #ddd;
+      color: #666;
       padding: 5px 10px;
       border-radius: 4px;
       font-size: 11px;
@@ -107,8 +116,9 @@
       transition: background 0.12s, color 0.12s;
     }
     #restore-deleted-btn:hover {
-      background: #1e3050;
+      background: #f5f5f5;
       color: #e06c00;
+      border-color: #e06c00;
     }
 
     /* Big mileage display */
@@ -129,13 +139,13 @@
 
     /* Stats */
     #stat-box {
-      background: #0f3460; border-radius: 6px; padding: 10px 12px;
+      background: #f5f6f8; border-radius: 6px; padding: 10px 12px;
     }
     .stat-row {
       display: flex; justify-content: space-between;
       align-items: baseline; padding: 2px 0;
     }
-    .stat-lbl { font-size: 11px; color: #7a91b0; }
+    .stat-lbl { font-size: 11px; color: #777; }
     .stat-val { font-size: 15px; font-weight: 700; color: #e06c00; }
 
     /* Buttons */
@@ -149,26 +159,27 @@
     }
     .btn:hover { opacity: 0.82; }
     .btn-orange { background: #e06c00; color: #fff; }
-    .btn-ghost  { background: #1e3050; color: #99aabb; border: 1px solid #2a4070; }
+    .btn-ghost  { background: #f0f0f0; color: #555; border: 1px solid #ddd; }
 
     /* Route list */
     #route-scroll {
       flex: 1; overflow-y: auto; padding: 10px 12px;
     }
     #route-scroll::-webkit-scrollbar { width: 5px; }
-    #route-scroll::-webkit-scrollbar-track { background: #16213e; }
-    #route-scroll::-webkit-scrollbar-thumb { background: #2a4070; border-radius: 3px; }
+    #route-scroll::-webkit-scrollbar-track { background: #f5f5f5; }
+    #route-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
 
     .empty-state {
-      text-align: center; padding: 32px 12px; color: #3a5070;
+      text-align: center; padding: 32px 12px; color: #bbb;
     }
     .empty-state .icon { font-size: 30px; margin-bottom: 10px; }
     .empty-state p { font-size: 12px; line-height: 1.5; }
 
     .seg-card {
-      background: #0f3460; border-radius: 5px;
+      background: #f5f6f8; border-radius: 5px;
       padding: 8px 10px; margin-bottom: 6px;
       display: flex; align-items: flex-start; gap: 8px;
+      border: 1px solid #e8e8e8;
     }
     .seg-num {
       color: #e06c00; font-size: 11px; font-weight: 700;
@@ -176,12 +187,12 @@
     }
     .seg-info { flex: 1; min-width: 0; }
     .seg-name {
-      font-size: 11px; font-weight: 600; color: #d0ddf0;
+      font-size: 11px; font-weight: 600; color: #1a1a1a;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .seg-meta { font-size: 10px; color: #5a7090; margin-top: 2px; }
+    .seg-meta { font-size: 10px; color: #888; margin-top: 2px; }
     .seg-remove {
-      background: none; border: none; color: #334e6a;
+      background: none; border: none; color: #ccc;
       cursor: pointer; font-size: 18px; line-height: 1;
       flex-shrink: 0; transition: color 0.12s; padding: 0;
     }
@@ -190,48 +201,41 @@
     /* -- LOGIN GATE --------------------------------------------------- */
     #login-gate {
       position: fixed; inset: 0; z-index: 99999;
-      background: #111827;
+      background: #f0f2f5;
       display: flex; align-items: center; justify-content: center;
       flex-direction: column;
     }
     #login-gate.hidden { display: none; }
     .login-box {
-      background: #16213e;
+      background: #ffffff;
       border: 2px solid #e06c00;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 36px 40px;
       text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
       max-width: 360px; width: 90%;
     }
     .login-box h1 {
-      color: #fff; font-size: 20px; font-weight: 800;
+      color: #1a1a1a; font-size: 20px; font-weight: 800;
       margin-bottom: 4px;
     }
     .login-box p {
-      color: #7a91b0; font-size: 12px; margin-bottom: 22px;
+      color: #888; font-size: 12px; margin-bottom: 22px;
     }
     .login-box input[type="password"] {
       width: 100%; padding: 10px 14px;
-      border: 1px solid #2a4070; border-radius: 5px;
-      background: #0f3460; color: #e8edf5;
+      border: 1px solid #ddd; border-radius: 6px;
+      background: #f5f5f5; color: #1a1a1a;
       font-size: 14px; outline: none;
       margin-bottom: 14px;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
     }
     .login-box input[type="password"]:focus {
       border-color: #e06c00;
+      background: #fff;
     }
-    .login-box button {
-      width: 100%; padding: 10px;
-      background: #e06c00; color: #fff;
-      border: none; border-radius: 5px;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .login-box button:hover { opacity: 0.85; }
     .login-error {
-      color: #f87171; font-size: 12px;
+      color: #dc2626; font-size: 12px;
       margin-top: 10px; display: none;
     }
 
@@ -263,7 +267,7 @@
       background: rgba(255,255,255,0.94);
       padding: 9px 12px; border-radius: 6px;
       font-size: 11px; line-height: 1.9;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .ml-title { font-weight: 700; font-size: 10px; text-transform: uppercase;
                 letter-spacing: 0.8px; color: #333; margin-bottom: 3px; }
@@ -272,69 +276,73 @@
 
     /* -- GARAGE ------------------------------------------------------- */
     .garage-bike {
-      background: #0f3460; border-radius: 5px;
+      background: #f5f6f8; border-radius: 5px;
       padding: 8px 10px; margin-bottom: 6px;
-      border-left: 3px solid #2a4070;
+      border-left: 3px solid #ddd;
+      border: 1px solid #e8e8e8;
+      border-left: 3px solid #ddd;
     }
-    .garage-bike.garage-limiting { border-left-color: #facc15; }
+    .garage-bike.garage-limiting { border-left-color: #f59e0b; }
     .garage-bike-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 3px;
     }
     .garage-bike-name {
-      font-size: 11px; font-weight: 700; color: #d0ddf0;
+      font-size: 11px; font-weight: 700; color: #1a1a1a;
     }
-    .garage-limiting .garage-bike-name { color: #facc15; }
+    .garage-limiting .garage-bike-name { color: #b45309; }
     .garage-remove {
-      background: none; border: none; color: #334e6a;
+      background: none; border: none; color: #ccc;
       cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
       transition: color 0.12s;
     }
     .garage-remove:hover { color: #e74c3c; }
     .garage-bike-meta {
-      font-size: 10px; color: #5a7090; margin-bottom: 5px;
+      font-size: 10px; color: #888; margin-bottom: 5px;
     }
     .garage-range { color: #e06c00; font-weight: 700; }
     .garage-mpg-row {
       display: flex; align-items: center; gap: 6px;
     }
-    .garage-mpg-lbl { font-size: 10px; color: #7a91b0; }
+    .garage-mpg-lbl { font-size: 10px; color: #888; }
     .garage-mpg-input {
-      width: 52px; background: #16213e; border: 1px solid #2a4070;
-      border-radius: 3px; color: #e8edf5; font-size: 11px;
+      width: 52px; background: #fff; border: 1px solid #ddd;
+      border-radius: 3px; color: #333; font-size: 11px;
       padding: 2px 5px; outline: none; text-align: center;
     }
     .garage-mpg-input:focus { border-color: #e06c00; }
-    .garage-mpg-hint { font-size: 10px; color: #3a5070; }
+    .garage-mpg-hint { font-size: 10px; color: #bbb; }
 
     /* Bike search */
     .bike-search-wrap { position: relative; margin-bottom: 8px; }
     .bike-search-input {
-      width: 100%; background: #0f3460; border: 1px solid #2a4070;
-      border-radius: 4px; color: #e8edf5; font-size: 11px;
+      width: 100%; background: #f5f5f5; border: 1px solid #ddd;
+      border-radius: 4px; color: #333; font-size: 11px;
       padding: 6px 8px; outline: none;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
     }
-    .bike-search-input:focus { border-color: #e06c00; }
+    .bike-search-input:focus { border-color: #e06c00; background: #fff; }
     #bike-search-results {
       position: absolute; top: 100%; left: 0; right: 0; z-index: 500;
-      background: #16213e; border: 1px solid #e06c00;
+      background: #fff; border: 1px solid #e06c00;
       border-radius: 0 0 5px 5px; max-height: 160px; overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .bike-result {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #1e3050;
+      padding: 6px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
       transition: background 0.1s;
     }
     .bike-result:last-child { border-bottom: none; }
-    .bike-result:hover { background: #1e3050; }
-    .bike-result-name { font-size: 11px; color: #d0ddf0; }
-    .bike-result-info { font-size: 10px; color: #5a7090; flex-shrink: 0; margin-left: 8px; }
-    .bike-no-results { font-size: 11px; color: #5a7090; padding: 8px 10px; }
+    .bike-result:hover { background: #f5f6f8; }
+    .bike-result-name { font-size: 11px; color: #1a1a1a; }
+    .bike-result-info { font-size: 10px; color: #888; flex-shrink: 0; margin-left: 8px; }
+    .bike-no-results { font-size: 11px; color: #aaa; padding: 8px 10px; }
 
     /* Range warning bar */
     #range-warning {
       border-left: 3px solid #2ecc71;
-      background: #0a1a0a; padding: 8px 10px;
+      background: #f0fdf4; padding: 8px 10px;
       margin-top: 8px; border-radius: 0 4px 4px 0;
       transition: border-color 0.3s;
     }
@@ -345,58 +353,56 @@
       gap: 6px; margin-bottom: 5px;
     }
     .saved-route-name {
-      flex: 1; font-size: 11px; color: #c8d5e8;
+      flex: 1; font-size: 11px; color: #333;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .saved-route-dist { font-size: 10px; color: #5a7090; flex-shrink: 0; }
+    .saved-route-dist { font-size: 10px; color: #888; flex-shrink: 0; }
     .saved-route-btns { display: flex; gap: 4px; flex-shrink: 0; }
     .saved-route-btns button {
-      background: none; border: 1px solid #2a4070; color: #99aabb;
+      background: none; border: 1px solid #ddd; color: #666;
       padding: 2px 7px; border-radius: 3px; font-size: 10px; cursor: pointer;
     }
     .saved-route-btns button:hover { border-color: #e06c00; color: #e06c00; }
-    .save-input-row { display: flex; gap: 6px; margin-top: 4px; }
+    .save-input-row { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
     .save-input-row input {
-      flex: 1; background: #0f3460; border: 1px solid #2a4070; border-radius: 4px;
-      color: #e8edf5; font-size: 11px; padding: 5px 8px; outline: none;
+      flex: 1; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+      color: #333; font-size: 11px; padding: 5px 8px; outline: none;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
     }
-    .save-input-row input:focus { border-color: #e06c00; }
-    .save-input-row button {
-      background: #e06c00; color: #fff; border: none; border-radius: 4px;
-      font-size: 11px; font-weight: 700; padding: 5px 10px; cursor: pointer; white-space: nowrap;
-    }
-    .save-input-row button:hover { opacity: 0.82; }
+    .save-input-row input:focus { border-color: #e06c00; background: #fff; }
 
     /* Difficulty breakdown rows */
     .diff-row { display: flex; justify-content: space-between; padding: 1px 0; }
-    .diff-row-lbl { font-size: 10px; color: #7a91b0; display: flex; align-items: center; gap: 5px; }
+    .diff-row-lbl { font-size: 10px; color: #777; display: flex; align-items: center; gap: 5px; }
     .diff-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .diff-row-val { font-size: 10px; color: #99aabb; }
+    .diff-row-val { font-size: 10px; color: #555; }
 
-    /* -- SIDEBAR TOGGLE (mobile) -------------------------------------- */
+    /* -- SIDEBAR TOGGLE ----------------------------------------------- */
     #sidebar-toggle {
-      display: block;
       position: absolute; top: 50%; left: -18px;
       transform: translateY(-50%);
       z-index: 1000;
-      background: #0f3460; color: #e06c00;
-      border: 2px solid #e06c00; border-radius: 50%;
-      width: 36px; height: 36px;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; line-height: 32px; text-align: center;
-      box-shadow: -2px 0 8px rgba(0,0,0,0.4);
-      transition: background 0.15s;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+      border: 2px solid #e06c00;
+      border-radius: 50%;
+      --md-filled-icon-button-container-color: #ffffff;
+      --md-filled-icon-button-icon-color: #e06c00;
+      --md-filled-icon-button-container-size: 36px;
+      --md-filled-icon-button-icon-size: 16px;
+      --md-filled-icon-button-hover-container-color: #ffffff;
+      --md-filled-icon-button-hover-icon-color: #e06c00;
+      --md-filled-icon-button-pressed-icon-color: #e06c00;
+      --md-filled-icon-button-focus-icon-color: #e06c00;
     }
-    #sidebar-toggle:hover { background: #1e3050; }
 
     /* -- SHARE TOAST -------------------------------------------------- */
     #share-toast {
       position: fixed; bottom: 28px; left: 50%;
       transform: translateX(-50%);
-      background: #0f3460; border: 1px solid #e06c00;
-      color: #e8edf5; font-size: 12px;
+      background: #fff; border: 1px solid #e06c00;
+      color: #333; font-size: 12px;
       padding: 8px 18px; border-radius: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
       z-index: 20000;
@@ -406,17 +412,17 @@
     /* -- GPX IMPORT --------------------------------------------------- */
     #gpx-import-bar {
       display: none;
-      background: #0a1a2a; border-bottom: 1px solid #1e3050;
+      background: #f5f6f8; border-bottom: 1px solid #e8e8e8;
       padding: 6px 14px;
       display: none; align-items: center; justify-content: space-between;
-      font-size: 11px; color: #7a91b0;
+      font-size: 11px; color: #666;
     }
     #gpx-import-bar.visible { display: flex; }
     #gpx-import-bar button {
       background: none; border: none; color: #e74c3c;
       font-size: 11px; cursor: pointer; padding: 0;
     }
-    #gpx-import-bar button:hover { color: #ff6b6b; }
+    #gpx-import-bar button:hover { color: #dc2626; }
 
     /* -- WAYPOINTS ---------------------------------------------------- */
     .waypoint-row {
@@ -427,45 +433,44 @@
       font-size: 10px; flex-shrink: 0;
     }
     .waypoint-name {
-      flex: 1; font-size: 11px; color: #c8d5e8;
+      flex: 1; font-size: 11px; color: #333;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .waypoint-coords { font-size: 10px; color: #3a5070; flex-shrink: 0; }
+    .waypoint-coords { font-size: 10px; color: #aaa; flex-shrink: 0; }
     .waypoint-del {
-      background: none; border: none; color: #334e6a;
+      background: none; border: none; color: #ccc;
       cursor: pointer; font-size: 14px; padding: 0;
       transition: color 0.12s; flex-shrink: 0;
     }
     .waypoint-del:hover { color: #e74c3c; }
-    .waypoint-mode-active { background: #1e5c1e !important; color: #2ecc71 !important; }
 
     /* -- CONTEXT MENU ------------------------------------------------- */
     #ctx-menu {
       display: none;
       position: fixed;
       z-index: 10000;
-      background: #16213e;
+      background: #fff;
       border: 1px solid #e06c00;
-      border-radius: 6px;
+      border-radius: 8px;
       min-width: 210px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
     }
     .ctx-header {
       padding: 8px 12px;
-      background: #0f3460;
-      border-bottom: 1px solid #1e3050;
+      background: #f5f6f8;
+      border-bottom: 1px solid #e8e8e8;
     }
     .ctx-header .ctx-name {
       font-size: 12px;
       font-weight: 700;
-      color: #fff;
+      color: #1a1a1a;
     }
     .ctx-header .ctx-diff {
       font-size: 10px;
       font-weight: 400;
-      color: #7a91b0;
+      color: #888;
       margin-top: 2px;
     }
     .ctx-item {
@@ -475,36 +480,103 @@
       padding: 7px 12px;
       cursor: pointer;
       font-size: 12px;
-      color: #c8d5e8;
+      color: #333;
       transition: background 0.1s;
     }
     .ctx-item:hover {
-      background: #1e3050;
+      background: #f5f6f8;
       color: #e06c00;
     }
     .ctx-dot {
       width: 10px; height: 10px;
       border-radius: 50%;
       flex-shrink: 0;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(0,0,0,0.1);
     }
     .ctx-sep {
       height: 1px;
-      background: #1e3050;
+      background: #e8e8e8;
       margin: 2px 0;
     }
     .ctx-item.ctx-delete {
       color: #e74c3c;
     }
     .ctx-item.ctx-delete:hover {
-      background: #3a1010;
-      color: #ff6b6b;
+      background: #fff5f5;
+      color: #dc2626;
     }
   @media (max-width: 768px) {
     #sidebar { position: absolute; right: 0; top: 0; bottom: 0; z-index: 900; transition: width 0.25s; }
     #sidebar-toggle { display: block; }
     #sidebar.collapsed #sidebar-toggle { left: -18px; }
     #map-wrap { width: 100%; }
+  }
+
+  #trail-search-results {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 500;
+    background: #fff; border: 1px solid #e06c00;
+    border-radius: 0 0 5px 5px; max-height: 200px; overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  /* -- MATERIAL WEB COMPONENTS ---------------------------------------- */
+  md-outlined-button {
+    --md-outlined-button-container-height: 32px;
+    --md-outlined-button-label-text-size: 11px;
+    --md-outlined-button-label-text-weight: 700;
+    --md-outlined-button-label-text-tracking: 0.04em;
+    --md-outlined-button-label-text-color: #555;
+    --md-outlined-button-outline-color: #ddd;
+    --md-outlined-button-hover-label-text-color: #e06c00;
+    --md-outlined-button-hover-outline-color: #e06c00;
+    --md-outlined-button-hover-state-layer-color: #e06c00;
+    --md-outlined-button-pressed-label-text-color: #e06c00;
+    --md-outlined-button-focus-label-text-color: #e06c00;
+    --md-outlined-button-focus-outline-color: #e06c00;
+    flex: 1;
+    min-width: 0;
+  }
+  md-filled-button {
+    --md-filled-button-container-height: 32px;
+    --md-filled-button-label-text-size: 11px;
+    --md-filled-button-label-text-weight: 700;
+    --md-filled-button-label-text-tracking: 0.04em;
+    --md-filled-button-container-color: #e06c00;
+    --md-filled-button-label-text-color: #ffffff;
+    --md-filled-button-hover-container-color: #c55c00;
+    flex: 1;
+    min-width: 0;
+  }
+  md-checkbox {
+    --md-checkbox-selected-container-color: #e06c00;
+    --md-checkbox-selected-icon-color: #ffffff;
+    --md-checkbox-selected-hover-container-color: #c55c00;
+    --md-checkbox-selected-pressed-container-color: #a04800;
+    --md-checkbox-outline-color: #aaa;
+    --md-checkbox-hover-outline-color: #e06c00;
+    --md-checkbox-unselected-hover-outline-color: #888;
+  }
+  md-icon-button {
+    --md-icon-button-icon-color: #666;
+    --md-icon-button-hover-icon-color: #e06c00;
+    --md-icon-button-pressed-icon-color: #c55c00;
+  }
+  .save-input-row md-filled-button {
+    flex: none;
+    width: 100%;
+    --md-filled-button-container-height: 36px;
+  }
+  #waypoint-mode-btn {
+    flex: none;
+    --md-outlined-button-container-height: 28px;
+    --md-outlined-button-label-text-size: 10px;
+  }
+  .login-box md-filled-button {
+    width: 100%;
+    flex: none;
+    --md-filled-button-container-height: 40px;
+    --md-filled-button-label-text-size: 14px;
+    --md-filled-button-label-text-tracking: 0.05em;
   }
   </style>
 </head>
@@ -516,7 +588,7 @@
     <h1>East Fort Rock OHV</h1>
     <p>Deschutes National Forest · Trail Planner</p>
     <input type="password" id="login-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button onclick="doLogin()">Enter</button>
+    <md-filled-button onclick="doLogin()">Enter</md-filled-button>
     <div class="login-error" id="login-err">Incorrect password</div>
   </div>
 </div>
@@ -559,38 +631,50 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9664;</button>
+  <md-filled-icon-button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9664;</md-filled-icon-button>
   <div id="sidebar-inner">
   <div class="s-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
     <div>
       <h1>East Fort Rock OHV</h1>
       <p>Deschutes National Forest &middot; Route Planner</p>
     </div>
-    <button onclick="doLogout()" title="Log out" style="background:none;border:none;color:#7a91b0;cursor:pointer;font-size:16px;padding:2px 4px;flex-shrink:0;margin-top:1px;">⏻</button>
+    <md-icon-button onclick="doLogout()" title="Log out" style="flex-shrink:0;">⏻</md-icon-button>
   </div>
 
   <div id="error-bar"></div>
+
+  <!-- Trail search -->
+  <div class="s-section" style="padding-bottom:10px;">
+    <div class="bike-search-wrap" style="margin-bottom:0;">
+      <input type="text" id="trail-search" class="bike-search-input"
+             placeholder="&#128269; Search trails… e.g. '40' or 'China Hat'"
+             oninput="renderTrailSearch(this.value)"
+             onfocus="renderTrailSearch(this.value)"
+             onblur="setTimeout(function(){document.getElementById('trail-search-results').innerHTML='';},200)">
+      <div id="trail-search-results"></div>
+    </div>
+  </div>
 
   <!-- Difficulty filters -->
   <div class="s-section">
     <div class="s-title">Show Trails</div>
     <label class="f-row">
-      <input type="checkbox" id="f-easy" checked onchange="applyFilters()">
+      <md-checkbox id="f-easy" checked onchange="applyFilters()"></md-checkbox>
       <div class="f-swatch" style="background:#2ecc71;"></div>
       <span class="f-label">Easiest</span>
     </label>
     <label class="f-row">
-      <input type="checkbox" id="f-mod" checked onchange="applyFilters()">
+      <md-checkbox id="f-mod" checked onchange="applyFilters()"></md-checkbox>
       <div class="f-swatch" style="background:#3498db;"></div>
       <span class="f-label">More Difficult</span>
     </label>
     <label class="f-row">
-      <input type="checkbox" id="f-hard" checked onchange="applyFilters()">
+      <md-checkbox id="f-hard" checked onchange="applyFilters()"></md-checkbox>
       <div class="f-swatch" style="background:#222222; border: 1px solid #555;"></div>
       <span class="f-label">Most Difficult</span>
     </label>
     <label class="f-row">
-      <input type="checkbox" id="f-road" checked onchange="applyFilters()">
+      <md-checkbox id="f-road" checked onchange="applyFilters()"></md-checkbox>
       <div class="f-swatch" style="background:#e74c3c;"></div>
       <span class="f-label">Shared Use Roads</span>
     </label>
@@ -604,7 +688,7 @@
       <span id="st-dist-big">0.0</span><span class="total-miles-unit"> mi</span>
     </div>
     <!-- Garage -->
-    <div style="border-top:1px solid #1e3050;margin:10px -14px 0;padding:10px 14px 0;">
+    <div style="border-top:1px solid #e8e8e8;margin:10px -14px 0;padding:10px 14px 0;">
       <div class="s-title" style="margin-bottom:7px;">&#9968; Garage</div>
       <div class="bike-search-wrap">
         <input type="text" class="bike-search-input" id="bike-search"
@@ -630,7 +714,7 @@
         <span class="stat-lbl">Est. ride time</span>
         <span class="stat-val" id="st-time" style="font-size:12px;">—</span>
       </div>
-      <div id="diff-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid #1e3050;display:none;">
+      <div id="diff-breakdown" style="margin-top:6px;padding-top:6px;border-top:1px solid #e8e8e8;display:none;">
         <div class="diff-row" id="br-easy" style="display:none;">
           <span class="diff-row-lbl"><span class="diff-dot" style="background:#2ecc71;"></span>Easiest</span>
           <span class="diff-row-val" id="br-easy-val"></span>
@@ -650,13 +734,13 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="undoLast()">&#8617; Undo</button>
-      <button class="btn btn-ghost" onclick="clearRoute()">&#10005; Clear</button>
-      <button class="btn btn-orange" onclick="exportGPX()">&#11015; GPX</button>
+      <md-outlined-button onclick="undoLast()">&#8617; Undo</md-outlined-button>
+      <md-outlined-button onclick="clearRoute()">&#10005; Clear</md-outlined-button>
+      <md-filled-button onclick="exportGPX()">&#11015; GPX</md-filled-button>
     </div>
     <div class="btn-row" style="margin-top:5px;">
-      <button class="btn btn-ghost" onclick="shareRoute()" title="Copy shareable link">&#128279; Share</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('gpx-file-input').click()" title="Import GPX track">&#8645; Import GPX</button>
+      <md-outlined-button onclick="shareRoute()" title="Copy shareable link">&#128279; Share</md-outlined-button>
+      <md-outlined-button onclick="document.getElementById('gpx-file-input').click()" title="Import GPX track">&#8645; Import GPX</md-outlined-button>
       <input type="file" id="gpx-file-input" accept=".gpx" style="display:none" onchange="importGPX(this)">
     </div>
   </div>
@@ -671,9 +755,7 @@
   <div class="s-section">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
       <div class="s-title" style="margin-bottom:0;">&#128205; Waypoints</div>
-      <button id="waypoint-mode-btn" class="btn btn-ghost"
-              style="font-size:10px;padding:3px 8px;flex:none;"
-              onclick="toggleWaypointMode()">+ Add</button>
+      <md-outlined-button id="waypoint-mode-btn" onclick="toggleWaypointMode()">+ Add</md-outlined-button>
     </div>
     <div id="waypoint-list"></div>
   </div>
@@ -684,7 +766,7 @@
     <div class="save-input-row">
       <input type="text" id="save-route-name" placeholder="Route name…" maxlength="40"
              onkeydown="if(event.key==='Enter')saveRoute()">
-      <button onclick="saveRoute()">Save</button>
+      <md-filled-button onclick="saveRoute()">Save</md-filled-button>
     </div>
     <div id="saved-routes-list" style="margin-top:8px;"></div>
   </div>
@@ -773,6 +855,7 @@ let allSegsMap   = new Map();  // id -> seg, for O(1) lookups
 let _trailFeatures = null;
 let _roadFeatures  = null;
 let selectedSet  = new Set();
+let _searchHighlight = [];
 let routeOrder   = [];
 let ctxTargetSeg = null;
 
@@ -1365,6 +1448,89 @@ function restoreDeleted() {
 }
 
 // =====================================================================
+// TRAIL SEARCH
+// =====================================================================
+function renderTrailSearch(query) {
+  var el = document.getElementById('trail-search-results');
+  query = query.trim();
+  var q = query.toLowerCase();
+
+  // Build unique trail index (deduplicated by trailNo or name, roads excluded)
+  var trailMap = {};
+  allSegs.forEach(function(seg) {
+    if (seg.difficulty === 'road') return;
+    var key = seg.trailNo || seg.name;
+    if (!trailMap[key]) {
+      var num = extractTrailNum(seg.trailNo);
+      trailMap[key] = { key: key, name: seg.name, trailNo: seg.trailNo,
+                        num: num ? '' + num : '', miles: 0, diff: seg.difficulty };
+    }
+    trailMap[key].miles += seg.miles;
+  });
+
+  var all = Object.values(trailMap).sort(function(a, b) {
+    return a.name.localeCompare(b.name);
+  });
+
+  var results = q ? all.filter(function(t) {
+    return t.name.toLowerCase().indexOf(q) >= 0 ||
+           t.num.indexOf(q) >= 0 ||
+           (t.trailNo || '').toLowerCase().indexOf(q) >= 0;
+  }) : all;
+  results = results.slice(0, 50);
+
+  if (!results.length) {
+    el.innerHTML = q ? '<div class="bike-no-results">No trails found</div>' : '';
+    return;
+  }
+  el.innerHTML = results.map(function(t) {
+    var dot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;' +
+              'background:' + diffColor(t.diff) + ';margin-right:5px;border:1px solid rgba(0,0,0,0.1);flex-shrink:0;"></span>';
+    var safeKey = t.key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="bike-result" onmousedown="zoomToTrail(\'' + safeKey + '\')">' +
+      '<span class="bike-result-name" style="display:flex;align-items:center;">' + dot + t.name + '</span>' +
+      '<span class="bike-result-info">' + t.miles.toFixed(1) + ' mi</span>' +
+    '</div>';
+  }).join('');
+}
+
+function clearSearchHighlight() {
+  _searchHighlight.forEach(function(seg) {
+    if (!seg.layer) return;
+    var sel = selectedSet.has(seg.id);
+    seg.layer.setStyle({
+      color:   sel ? C.selected : diffColor(seg.difficulty),
+      weight:  sel ? 5 : diffWeight(seg.difficulty),
+      opacity: diffOpacity(seg.difficulty)
+    });
+  });
+  _searchHighlight = [];
+}
+
+function zoomToTrail(key) {
+  var matching = allSegs.filter(function(seg) {
+    return (seg.trailNo || seg.name) === key;
+  });
+  if (!matching.length) return;
+
+  var latlngs = [];
+  matching.forEach(function(seg) {
+    seg.coords.forEach(function(c) { latlngs.push([c[1], c[0]]); });
+  });
+  map.fitBounds(L.latLngBounds(latlngs), { padding: [50, 50], maxZoom: 14 });
+
+  // Clear any previous search highlight, then apply new one
+  clearSearchHighlight();
+  _searchHighlight = matching;
+  matching.forEach(function(seg) {
+    if (seg.layer) seg.layer.setStyle({ color: C.hover, weight: 7, opacity: 1 });
+  });
+
+  document.getElementById('trail-search').value = '';
+  document.getElementById('trail-search-results').innerHTML = '';
+}
+
+// =====================================================================
 // FILTERS
 // =====================================================================
 function applyFilters() {
@@ -1640,7 +1806,7 @@ function renderSavedRoutes() {
   var list = document.getElementById('saved-routes-list');
   if (!list) return;
   if (!routes.length) {
-    list.innerHTML = '<div style="font-size:10px;color:#3a5070;text-align:center;padding:4px 0;">No saved routes yet</div>';
+    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:4px 0;">No saved routes yet</div>';
     return;
   }
   list.innerHTML = routes.map(function(r, i) {
@@ -1745,7 +1911,7 @@ function renderGarage() {
   if (!list) return;
 
   if (!garage.length) {
-    list.innerHTML = '<div style="font-size:10px;color:#3a5070;text-align:center;padding:6px 0;">Search above to add bikes for your group ride</div>';
+    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:6px 0;">Search above to add bikes for your group ride</div>';
     return;
   }
 
@@ -1812,8 +1978,8 @@ function renderRangeWarning() {
       '<div style="width:' + pctDisplay + '%;height:100%;background:' + color + ';transition:width 0.3s;border-radius:3px;"></div>' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;margin-top:3px;">' +
-      '<span style="font-size:10px;color:#7a91b0;">' + routeMiles.toFixed(1) + ' mi planned</span>' +
-      '<span style="font-size:10px;color:#7a91b0;">' + Math.round(limiting.range) + ' mi range &middot; ' + pctDisplay + '%</span>' +
+      '<span style="font-size:10px;color:#888;">' + routeMiles.toFixed(1) + ' mi planned</span>' +
+      '<span style="font-size:10px;color:#888;">' + Math.round(limiting.range) + ' mi range &middot; ' + pctDisplay + '%</span>' +
     '</div>';
 }
 
@@ -1924,16 +2090,21 @@ function toggleWaypointMode() {
   var btn = document.getElementById('waypoint-mode-btn');
   if (waypointModeActive) {
     btn.textContent = '✕ Cancel';
-    btn.classList.add('waypoint-mode-active');
+    btn.style.setProperty('--md-outlined-button-container-color', '#1e5c1e');
+    btn.style.setProperty('--md-outlined-button-label-text-color', '#2ecc71');
+    btn.style.setProperty('--md-outlined-button-outline-color', '#2ecc71');
     map.getContainer().style.cursor = 'crosshair';
   } else {
     btn.textContent = '+ Add';
-    btn.classList.remove('waypoint-mode-active');
+    btn.style.removeProperty('--md-outlined-button-container-color');
+    btn.style.removeProperty('--md-outlined-button-label-text-color');
+    btn.style.removeProperty('--md-outlined-button-outline-color');
     map.getContainer().style.cursor = '';
   }
 }
 
 map.on('click', function(e) {
+  clearSearchHighlight();
   if (!waypointModeActive) return;
   var name = prompt('Waypoint name:', 'Waypoint');
   if (!name) { toggleWaypointMode(); return; }
@@ -1972,7 +2143,7 @@ function renderWaypoints() {
 
   if (!list) return;
   if (!wpts.length) {
-    list.innerHTML = '<div style="font-size:10px;color:#3a5070;text-align:center;padding:4px 0;">Click "+ Add" then tap the map</div>';
+    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:4px 0;">Click "+ Add" then tap the map</div>';
     return;
   }
   list.innerHTML = wpts.map(function(wp, i) {
@@ -2032,6 +2203,13 @@ async function loadData() {
 // BOOT
 // =====================================================================
 loadData();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
 </script>
 </body>
 </html>

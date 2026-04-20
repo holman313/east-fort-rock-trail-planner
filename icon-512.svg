@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#e06c00"/>
+  <text x="256" y="218" font-family="Arial Black, Arial, sans-serif" font-size="144" font-weight="900" fill="white" text-anchor="middle">EFR</text>
+  <text x="256" y="314" font-family="Arial, sans-serif" font-size="50" font-weight="400" fill="rgba(255,255,255,0.85)" text-anchor="middle" letter-spacing="6">TRAIL PLANNER</text>
+  <path d="M80,395 Q148,358 192,378 Q252,408 308,326 Q352,254 420,218" stroke="rgba(255,255,255,0.6)" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
