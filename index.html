@@ -507,9 +507,18 @@
     }
   @media (max-width: 768px) {
     #sidebar { position: absolute; right: 0; top: 0; bottom: 0; z-index: 900; transition: width 0.25s; }
-    #sidebar-toggle { display: block; }
-    #sidebar.collapsed #sidebar-toggle { left: -18px; }
     #map-wrap { width: 100%; }
+    #sidebar-toggle {
+      position: fixed !important;
+      top: 14px !important;
+      right: 14px !important;
+      left: auto !important;
+      transform: none !important;
+      z-index: 1100;
+      --md-filled-icon-button-container-size: 48px;
+      --md-filled-icon-button-icon-size: 22px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+    }
   }
 
   #trail-search-results {
@@ -2162,8 +2171,18 @@ function toggleSidebar() {
   var sidebar = document.getElementById('sidebar');
   var btn     = document.getElementById('sidebar-toggle');
   var collapsed = sidebar.classList.toggle('collapsed');
-  btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
+  var isMobile = window.innerWidth <= 768;
+  if (isMobile) {
+    btn.innerHTML = collapsed ? '&#9776;' : '&#10005;';
+  } else {
+    btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
+  }
   setTimeout(function() { map.invalidateSize(); }, 260);
+}
+
+// Set correct initial icon on mobile
+if (window.innerWidth <= 768) {
+  document.getElementById('sidebar-toggle').innerHTML = '&#10005;';
 }
 
 // =====================================================================
