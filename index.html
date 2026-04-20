@@ -179,9 +179,8 @@
     }
     .cs-header:hover, .cs-header:active { background: #ebebeb; }
     .cs-chevron {
-      font-size: 18px; color: #999;
+      font-size: 16px; color: #888;
       font-weight: 700;
-      transition: transform 0.25s;
       flex-shrink: 0; line-height: 1;
     }
     .cs-body {
@@ -696,7 +695,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-filters')">
           <span class="s-title" style="margin:0;">Show Trails</span>
-          <span class="cs-chevron" id="chev-cs-filters">▾</span>
+          <span class="cs-chevron" id="chev-cs-filters">&#9660;</span>
         </div>
         <div class="cs-body" id="cs-filters">
           <div class="cs-pad">
@@ -729,7 +728,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-route')">
           <span class="s-title" style="margin:0;">Your Route</span>
-          <span class="cs-chevron" id="chev-cs-route">▾</span>
+          <span class="cs-chevron" id="chev-cs-route">&#9660;</span>
         </div>
         <div class="cs-body" id="cs-route">
           <div class="cs-pad">
@@ -787,7 +786,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-garage')">
           <span class="s-title" style="margin:0;">&#9968; Garage</span>
-          <span class="cs-chevron" id="chev-cs-garage" style="transform:rotate(-90deg)">▾</span>
+          <span class="cs-chevron" id="chev-cs-garage"">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-garage">
           <div class="cs-pad">
@@ -808,7 +807,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-waypoints')">
           <span class="s-title" style="margin:0;">&#128205; Waypoints</span>
-          <span class="cs-chevron" id="chev-cs-waypoints" style="transform:rotate(-90deg)">▾</span>
+          <span class="cs-chevron" id="chev-cs-waypoints"">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-waypoints">
           <div class="cs-pad">
@@ -825,7 +824,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-saved')">
           <span class="s-title" style="margin:0;">Saved Routes</span>
-          <span class="cs-chevron" id="chev-cs-saved" style="transform:rotate(-90deg)">▾</span>
+          <span class="cs-chevron" id="chev-cs-saved"">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-saved">
           <div class="cs-pad">
@@ -843,7 +842,7 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-share')">
           <span class="s-title" style="margin:0;">Share &amp; Export</span>
-          <span class="cs-chevron" id="chev-cs-share" style="transform:rotate(-90deg)">▾</span>
+          <span class="cs-chevron" id="chev-cs-share"">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-share">
           <div class="cs-pad">
@@ -2247,7 +2246,7 @@ function toggleSection(id) {
   var body = document.getElementById(id);
   var chevron = document.getElementById('chev-' + id);
   var collapsed = body.classList.toggle('collapsed');
-  if (chevron) chevron.style.transform = collapsed ? 'rotate(-90deg)' : '';
+  if (chevron) chevron.innerHTML = collapsed ? '&#9654;' : '&#9660;';
 }
 
 function toggleSidebar() {
