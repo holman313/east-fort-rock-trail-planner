@@ -417,6 +417,23 @@
       --md-filled-icon-button-focus-icon-color: #e06c00;
     }
 
+    /* -- LOOP PLANNER ------------------------------------------------- */
+    .loop-field { margin-bottom: 10px; }
+    .loop-label { font-size: 11px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+    .loop-select {
+      width: 100%; padding: 7px 10px; border: 1px solid #d0d0d0;
+      border-radius: 6px; font-size: 13px; background: #fff; color: #333;
+      appearance: none; cursor: pointer;
+    }
+    .loop-select:focus { outline: none; border-color: #e06c00; }
+    .loop-slider { width: 100%; accent-color: #e06c00; cursor: pointer; }
+    .loop-slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: #aaa; margin-top: 1px; }
+    #loop-result { margin-top: 10px; font-size: 12px; }
+    .loop-found { background: #f0faf0; border: 1px solid #2ecc71; border-radius: 6px; padding: 10px 12px; }
+    .loop-found-miles { font-size: 18px; font-weight: 700; color: #27ae60; }
+    .loop-not-found { color: #e74c3c; font-size: 12px; padding: 8px 0; }
+    .loop-btn-row { display: flex; gap: 8px; margin-top: 8px; }
+
     /* -- ELEVATION PROFILE -------------------------------------------- */
     .elev-label {
       font-size: 11px; font-weight: 600; color: #888;
@@ -747,6 +764,43 @@
               <span class="f-label">Shared Use Roads</span>
             </label>
             <button id="restore-deleted-btn" onclick="restoreDeleted()"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loop Planner (collapsed by default) -->
+      <div class="cs-wrap">
+        <div class="cs-header" onclick="toggleSection('cs-loop')">
+          <span class="s-title" style="margin:0;">&#x1F504; Loop Planner</span>
+          <span class="cs-chevron" id="chev-cs-loop">&#9654;</span>
+        </div>
+        <div class="cs-body collapsed" id="cs-loop">
+          <div class="cs-pad">
+            <div class="loop-field">
+              <label class="loop-label">Staging Area</label>
+              <select id="loop-staging" class="loop-select">
+                <option value="0">Camp II Staging</option>
+                <option value="1">China Hat Campground</option>
+                <option value="2">Road 25 Staging</option>
+                <option value="3">Road 2510 Staging</option>
+                <option value="4">South Lava Staging</option>
+              </select>
+            </div>
+            <div class="loop-field">
+              <label class="loop-label">Target Distance — <span id="loop-miles-val">15</span> mi</label>
+              <input type="range" id="loop-miles" class="loop-slider"
+                     min="5" max="60" value="15" step="5"
+                     oninput="document.getElementById('loop-miles-val').textContent=this.value">
+              <div class="loop-slider-labels"><span>5</span><span>60</span></div>
+            </div>
+            <div class="loop-field">
+              <label class="f-row" style="margin:0;">
+                <md-checkbox id="loop-no-roads" checked></md-checkbox>
+                <span class="f-label">Trails only (no shared roads)</span>
+              </label>
+            </div>
+            <md-filled-button id="loop-find-btn" onclick="runLoopPlanner()" style="width:100%;margin-top:6px;">&#x1F50D; Find Loop</md-filled-button>
+            <div id="loop-result"></div>
           </div>
         </div>
       </div>
@@ -1575,6 +1629,7 @@ function restoreDeleted() {
   localStorage.removeItem('deletedTrails');
   selectedSet.clear();
   routeOrder = [];
+  _loopGraph = null;
   updateStats();
   renderList();
   var segments = buildTopology(_trailFeatures, _roadFeatures);
@@ -2276,6 +2331,190 @@ function shareRoute() {
 }
 
 // =====================================================================
+// LOOP PLANNER
+// =====================================================================
+var _loopGraph = null;
+var _loopPreview = [];  // seg IDs for current suggestion
+
+function buildLoopGraph() {
+  if (_loopGraph) return _loopGraph;
+  var g = {};
+  allSegs.forEach(function(seg) {
+    var s = snapKey(seg.coords[0]);
+    var e = snapKey(seg.coords[seg.coords.length - 1]);
+    if (s === e) return;
+    if (!g[s]) g[s] = [];
+    if (!g[e]) g[e] = [];
+    g[s].push({ seg: seg, to: e });
+    g[e].push({ seg: seg, to: s });
+  });
+  _loopGraph = g;
+  return g;
+}
+
+function loopNearestNode(graph, lat, lng) {
+  var minDist = Infinity, bestKey = null;
+  var keys = Object.keys(graph);
+  for (var i = 0; i < keys.length; i++) {
+    var parts = keys[i].split(',');
+    var kLat = parseFloat(parts[1]);
+    var kLng = parseFloat(parts[0]);
+    var d = (lat - kLat) * (lat - kLat) + (lng - kLng) * (lng - kLng);
+    if (d < minDist) { minDist = d; bestKey = keys[i]; }
+  }
+  return bestKey;
+}
+
+function loopDijkstra(graph, startKey, endKey, maxMiles) {
+  var dist = {}, prev = {};
+  var queue = [{ key: startKey, miles: 0 }];
+  dist[startKey] = 0;
+  while (queue.length) {
+    queue.sort(function(a, b) { return a.miles - b.miles; });
+    var curr = queue.shift();
+    if (curr.key === endKey) break;
+    if (curr.miles > (dist[curr.key] !== undefined ? dist[curr.key] : Infinity)) continue;
+    var edges = graph[curr.key] || [];
+    for (var i = 0; i < edges.length; i++) {
+      var e = edges[i];
+      var nm = curr.miles + e.seg.miles;
+      if (nm <= maxMiles && nm < (dist[e.to] !== undefined ? dist[e.to] : Infinity)) {
+        dist[e.to] = nm;
+        prev[e.to] = { fromKey: curr.key, segId: e.seg.id };
+        queue.push({ key: e.to, miles: nm });
+      }
+    }
+  }
+  if (dist[endKey] === undefined) return null;
+  var segIds = [], key = endKey;
+  while (key !== startKey && prev[key]) { segIds.unshift(prev[key].segId); key = prev[key].fromKey; }
+  if (key !== startKey) return null;
+  return { segIds: segIds, miles: dist[endKey] };
+}
+
+function findLoop(startKey, targetMiles, noRoads) {
+  var graph = buildLoopGraph();
+  var candidates = [];
+  for (var attempt = 0; attempt < 12; attempt++) {
+    var visited = {}, pathSegs = [], currentKey = startKey, totalMiles = 0, steps = 0;
+    while (totalMiles < targetMiles * 0.65 && steps < 400) {
+      steps++;
+      var edges = (graph[currentKey] || []).filter(function(e) {
+        return !visited[e.seg.id] && (!noRoads || e.seg.difficulty !== 'road');
+      });
+      if (!edges.length) break;
+      // Fisher-Yates shuffle
+      for (var i = edges.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = edges[i]; edges[i] = edges[j]; edges[j] = tmp;
+      }
+      var edge = edges[0];
+      visited[edge.seg.id] = true;
+      pathSegs.push(edge.seg.id);
+      currentKey = edge.to;
+      totalMiles += edge.seg.miles;
+    }
+    var budget = targetMiles * 1.2 - totalMiles;
+    if (budget <= 0) continue;
+    var ret = loopDijkstra(graph, currentKey, startKey, budget);
+    if (ret) {
+      var total = totalMiles + ret.miles;
+      candidates.push({ segIds: pathSegs.concat(ret.segIds), miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
+    }
+  }
+  if (!candidates.length) return null;
+  candidates.sort(function(a, b) { return a.diff - b.diff; });
+  return candidates[0];
+}
+
+function runLoopPlanner() {
+  var stagingIdx = parseInt(document.getElementById('loop-staging').value, 10);
+  var targetMiles = parseInt(document.getElementById('loop-miles').value, 10);
+  var noRoads = document.getElementById('loop-no-roads').checked;
+  var result = document.getElementById('loop-result');
+  var btn = document.getElementById('loop-find-btn');
+
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  result.innerHTML = '';
+
+  setTimeout(function() {
+    var s = STAGING[stagingIdx];
+    var graph = buildLoopGraph();
+    var startKey = loopNearestNode(graph, s.lat, s.lng);
+    var loop = findLoop(startKey, targetMiles, noRoads);
+    btn.disabled = false;
+    btn.textContent = '🔍 Find Loop';
+
+    if (!loop) {
+      result.innerHTML = '<div class="loop-not-found">No loop found within ' + targetMiles + ' mi from ' + s.name + '. Try a larger distance or allow roads.</div>';
+      return;
+    }
+
+    _loopPreview = loop.segIds;
+    highlightLoopPreview(_loopPreview);
+
+    result.innerHTML =
+      '<div class="loop-found">' +
+        '<div class="loop-found-miles">' + loop.miles.toFixed(1) + ' mi loop</div>' +
+        '<div style="font-size:11px;color:#555;margin-top:2px;">from ' + s.name + ' &middot; ' + loop.segIds.length + ' segments</div>' +
+        '<div class="loop-btn-row">' +
+          '<md-filled-button onclick="applyLoopToRoute()" style="flex:1;">&#10003; Apply to Route</md-filled-button>' +
+          '<md-outlined-button onclick="runLoopPlanner()" style="flex:1;">&#x21BA; Try Again</md-outlined-button>' +
+        '</div>' +
+      '</div>';
+  }, 30);
+}
+
+function highlightLoopPreview(segIds) {
+  // Clear previous highlights
+  clearLoopPreview();
+  segIds.forEach(function(id) {
+    var seg = allSegsMap.get(id);
+    if (seg && seg.layer) seg.layer.setStyle({ color: '#9b59b6', weight: 5, opacity: 0.85 });
+  });
+}
+
+function clearLoopPreview() {
+  if (!_loopPreview.length) return;
+  _loopPreview.forEach(function(id) {
+    var seg = allSegsMap.get(id);
+    if (seg && seg.layer) {
+      var inRoute = selectedSet.has(id);
+      seg.layer.setStyle({ color: inRoute ? '#e06c00' : seg.color, weight: inRoute ? 5 : diffWeight(seg.difficulty) });
+    }
+  });
+}
+
+function applyLoopToRoute() {
+  if (!_loopPreview.length) return;
+  // Clear current route
+  clearLoopPreview();
+  routeOrder.forEach(function(id) {
+    var seg = allSegsMap.get(id);
+    if (seg && seg.layer) seg.layer.setStyle({ color: seg.color, weight: diffWeight(seg.difficulty) });
+  });
+  selectedSet.clear();
+  routeOrder = [];
+
+  // Apply loop
+  _loopPreview.forEach(function(id) {
+    var seg = allSegsMap.get(id);
+    if (!seg) return;
+    selectedSet.add(id);
+    routeOrder.push(id);
+    if (seg.layer) seg.layer.setStyle({ color: '#e06c00', weight: 5 });
+  });
+  _loopPreview = [];
+  updateStats();
+  renderList();
+
+  // Open Your Route section
+  var body = document.getElementById('cs-route');
+  if (body && body.classList.contains('collapsed')) toggleSection('cs-route');
+}
+
+// =====================================================================
 // GPS LOCATE
 // =====================================================================
 var _locateMarker = null;
@@ -2400,6 +2639,7 @@ function toggleWaypointMode() {
 
 map.on('click', function(e) {
   clearSearchHighlight();
+  clearLoopPreview();
   if (!waypointModeActive) return;
   var name = prompt('Waypoint name:', 'Waypoint');
   if (!name) { toggleWaypointMode(); return; }
