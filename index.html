@@ -1754,6 +1754,29 @@ function applyFilters() {
 // ROUTE MANAGEMENT
 // =====================================================================
 function toggleSegment(seg) {
+  // Roads: select/deselect all sub-segments of the same parent road at once
+  if (seg.isRoad && seg.parentSegId) {
+    var siblings = allSegs.filter(function(s) { return s.parentSegId === seg.parentSegId; });
+    var allSelected = siblings.every(function(s) { return selectedSet.has(s.id); });
+    siblings.forEach(function(s) {
+      if (allSelected) {
+        selectedSet.delete(s.id);
+        routeOrder = routeOrder.filter(function(id) { return id !== s.id; });
+      } else if (!selectedSet.has(s.id)) {
+        selectedSet.add(s.id);
+        routeOrder.push(s.id);
+      }
+      if (s.layer) {
+        var sel = selectedSet.has(s.id);
+        s.layer.setStyle({ color: sel ? C.selected : s.color, weight: sel ? 6 : diffWeight(s.difficulty) });
+        if (sel) s.layer.bringToFront();
+      }
+    });
+    updateStats();
+    renderList();
+    return;
+  }
+
   if (selectedSet.has(seg.id)) {
     selectedSet.delete(seg.id);
     routeOrder = routeOrder.filter(function(id) { return id !== seg.id; });
