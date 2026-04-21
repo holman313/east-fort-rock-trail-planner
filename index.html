@@ -2365,7 +2365,7 @@ function loopNearestNode(graph, lat, lng) {
   return bestKey;
 }
 
-function loopDijkstra(graph, startKey, endKey, maxMiles) {
+function loopDijkstra(graph, startKey, endKey, maxMiles, allowed) {
   var dist = {}, prev = {};
   var queue = [{ key: startKey, miles: 0 }];
   dist[startKey] = 0;
@@ -2377,6 +2377,7 @@ function loopDijkstra(graph, startKey, endKey, maxMiles) {
     var edges = graph[curr.key] || [];
     for (var i = 0; i < edges.length; i++) {
       var e = edges[i];
+      if (!allowed[e.seg.difficulty]) continue;
       var nm = curr.miles + e.seg.miles;
       if (nm <= maxMiles && nm < (dist[e.to] !== undefined ? dist[e.to] : Infinity)) {
         dist[e.to] = nm;
@@ -2392,7 +2393,7 @@ function loopDijkstra(graph, startKey, endKey, maxMiles) {
   return { segIds: segIds, miles: dist[endKey] };
 }
 
-function findLoop(startKey, targetMiles, noRoads) {
+function findLoop(startKey, targetMiles, allowed) {
   var graph = buildLoopGraph();
   var candidates = [];
   for (var attempt = 0; attempt < 12; attempt++) {
@@ -2400,7 +2401,7 @@ function findLoop(startKey, targetMiles, noRoads) {
     while (totalMiles < targetMiles * 0.65 && steps < 400) {
       steps++;
       var edges = (graph[currentKey] || []).filter(function(e) {
-        return !visited[e.seg.id] && (!noRoads || e.seg.difficulty !== 'road');
+        return !visited[e.seg.id] && allowed[e.seg.difficulty];
       });
       if (!edges.length) break;
       // Fisher-Yates shuffle
@@ -2416,7 +2417,7 @@ function findLoop(startKey, targetMiles, noRoads) {
     }
     var budget = targetMiles * 1.2 - totalMiles;
     if (budget <= 0) continue;
-    var ret = loopDijkstra(graph, currentKey, startKey, budget);
+    var ret = loopDijkstra(graph, currentKey, startKey, budget, allowed);
     if (ret) {
       var total = totalMiles + ret.miles;
       candidates.push({ segIds: pathSegs.concat(ret.segIds), miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
@@ -2434,6 +2435,14 @@ function runLoopPlanner() {
   var result = document.getElementById('loop-result');
   var btn = document.getElementById('loop-find-btn');
 
+  // Respect Show Trails filter checkboxes
+  var allowed = {
+    easiest:  document.getElementById('f-easy').checked,
+    moderate: document.getElementById('f-mod').checked,
+    difficult:document.getElementById('f-hard').checked,
+    road:     !noRoads && document.getElementById('f-road').checked,
+  };
+
   btn.disabled = true;
   btn.textContent = 'Searching…';
   result.innerHTML = '';
@@ -2442,7 +2451,7 @@ function runLoopPlanner() {
     var s = STAGING[stagingIdx];
     var graph = buildLoopGraph();
     var startKey = loopNearestNode(graph, s.lat, s.lng);
-    var loop = findLoop(startKey, targetMiles, noRoads);
+    var loop = findLoop(startKey, targetMiles, allowed);
     btn.disabled = false;
     btn.textContent = '🔍 Find Loop';
 
