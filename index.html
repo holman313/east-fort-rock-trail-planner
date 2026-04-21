@@ -1841,15 +1841,27 @@ function updateElevation() {
     }
 
     var locations = sampled.map(function(c) { return c[1] + ',' + c[0]; }).join('|');
-    fetch('https://api.opentopodata.org/v1/ned10m?locations=' + locations)
-      .then(function(r) { return r.json(); })
+    var ctrl = new AbortController();
+    var timeoutId = setTimeout(function() { ctrl.abort(); }, 10000);
+    fetch('https://api.opentopodata.org/v1/ned10m?locations=' + locations, { signal: ctrl.signal })
+      .then(function(r) {
+        clearTimeout(timeoutId);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
       .then(function(data) {
-        if (!data.results) throw new Error('no results');
-        var elevs = data.results.map(function(r) { return r.elevation || 0; });
+        if (!data.results || !data.results.length) throw new Error(data.status || 'no results');
+        var elevs = data.results.map(function(r) { return r.elevation != null ? r.elevation : null; })
+                                .filter(function(e) { return e !== null; });
+        if (!elevs.length) throw new Error('null elevations');
         renderElevChart(elevs);
       })
-      .catch(function() {
-        loading.textContent = 'Elevation data unavailable.';
+      .catch(function(err) {
+        clearTimeout(timeoutId);
+        var msg = err && err.name === 'AbortError' ? 'Timed out — check your connection.' :
+                  err ? 'Elevation unavailable (' + err.message + ').' : 'Elevation unavailable.';
+        loading.style.display = 'block';
+        loading.textContent = msg;
       });
   }, 700);
 }
