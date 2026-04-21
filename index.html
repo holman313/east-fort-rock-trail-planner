@@ -2398,12 +2398,16 @@ function findLoop(startKey, targetMiles, allowed) {
   var candidates = [];
   for (var attempt = 0; attempt < 12; attempt++) {
     var visited = {}, pathSegs = [], currentKey = startKey, totalMiles = 0, steps = 0;
-    while (totalMiles < targetMiles * 0.65 && steps < 400) {
+    while (totalMiles < targetMiles * 0.70 && steps < 1200) {
       steps++;
       var edges = (graph[currentKey] || []).filter(function(e) {
         return !visited[e.seg.id] && allowed[e.seg.difficulty];
       });
-      if (!edges.length) break;
+      // If stuck on unvisited edges, allow revisits to keep exploring
+      if (!edges.length) {
+        edges = (graph[currentKey] || []).filter(function(e) { return allowed[e.seg.difficulty]; });
+        if (!edges.length) break;
+      }
       // Fisher-Yates shuffle
       for (var i = edges.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -2415,7 +2419,7 @@ function findLoop(startKey, targetMiles, allowed) {
       currentKey = edge.to;
       totalMiles += edge.seg.miles;
     }
-    var budget = targetMiles * 1.2 - totalMiles;
+    var budget = targetMiles * 1.3 - totalMiles;
     if (budget <= 0) continue;
     var ret = loopDijkstra(graph, currentKey, startKey, budget, allowed);
     if (ret) {
