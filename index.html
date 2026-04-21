@@ -1601,6 +1601,8 @@ function ctxDelete() {
   }
   allSegs = allSegs.filter(function(s) { return s.id !== seg.id; });
   allSegsMap.delete(seg.id);
+  allSegsBySegId.delete(seg.segId);
+  _loopGraph = null;
 
   updateRestoreBtn();
   hideContextMenu();
