@@ -2460,6 +2460,7 @@ function runLoopPlanner() {
       return;
     }
 
+    clearLoopPreview();
     _loopPreview = loop.segIds;
     highlightLoopPreview(_loopPreview);
 
@@ -2476,8 +2477,6 @@ function runLoopPlanner() {
 }
 
 function highlightLoopPreview(segIds) {
-  // Clear previous highlights
-  clearLoopPreview();
   segIds.forEach(function(id) {
     var seg = allSegsMap.get(id);
     if (seg && seg.layer) seg.layer.setStyle({ color: '#9b59b6', weight: 5, opacity: 0.85 });
