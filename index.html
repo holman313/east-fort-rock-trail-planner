@@ -1630,6 +1630,7 @@ function restoreDeleted() {
   selectedSet.clear();
   routeOrder = [];
   _loopGraph = null;
+  _snapIndex = null;
   updateStats();
   renderList();
   var segments = buildTopology(_trailFeatures, _roadFeatures);
@@ -1754,11 +1755,30 @@ function applyFilters() {
 // ROUTE MANAGEMENT
 // =====================================================================
 
+// Snap-key index: maps every endpoint key -> [seg, ...].
+// Includes ALL segments (unlike buildLoopGraph which skips degenerate segs).
+var _snapIndex = null;
+function buildSnapIndex() {
+  if (_snapIndex) return _snapIndex;
+  _snapIndex = {};
+  allSegs.forEach(function(seg) {
+    var s = snapKey(seg.coords[0]);
+    var e = snapKey(seg.coords[seg.coords.length - 1]);
+    if (!_snapIndex[s]) _snapIndex[s] = [];
+    _snapIndex[s].push(seg);
+    if (e !== s) {
+      if (!_snapIndex[e]) _snapIndex[e] = [];
+      _snapIndex[e].push(seg);
+    }
+  });
+  return _snapIndex;
+}
+
 // Returns the contiguous run of same-parent segments between real junctions.
-// Extends from clicked seg in both directions, stopping when a node connects
-// to a DIFFERENT parent trail (a real rider decision point).
+// Extends in both directions, stopping only at same-type junctions (trail-trail
+// or road-road). Uses _snapIndex so degenerate sub-segments are never skipped.
 function getConnectedRun(seg) {
-  var graph = buildLoopGraph();
+  var idx = buildSnapIndex();
   var parent = seg.parentSegId;
   var result = [seg];
   var inResult = {};
@@ -1771,27 +1791,26 @@ function getConnectedRun(seg) {
 
   endpoints.forEach(function(startNode) {
     var node = startNode;
-    var prevId = seg.id;
     for (var step = 0; step < 500; step++) {
-      // Stop only at junctions with same-type features (trail-trail or road-road).
-      // Road crossings on a trail (or trail crossings on a road) are not rider decision points.
-      var hasSameTypeJunction = (graph[node] || []).some(function(e) {
-        return e.seg.parentSegId !== parent && e.seg.isRoad === seg.isRoad;
+      var atNode = idx[node] || [];
+      // Stop at same-type junctions (trail meets trail, or road meets road)
+      var hasSameTypeJunction = atNode.some(function(s) {
+        return s.parentSegId !== parent && s.isRoad === seg.isRoad;
       });
       if (hasSameTypeJunction) break;
 
-      // Find next same-parent connected segment (not already in result)
-      var next = (graph[node] || []).filter(function(e) {
-        return e.seg.parentSegId === parent && !inResult[e.seg.id];
+      var next = atNode.filter(function(s) {
+        return s.parentSegId === parent && !inResult[s.id];
       });
       if (next.length === 0) break;
 
-      // Pick the one that isn't the segment we just came from
-      var edge = next[0];
-      inResult[edge.seg.id] = true;
-      result.push(edge.seg);
-      node = edge.to;
-      prevId = edge.seg.id;
+      var nextSeg = next[0];
+      inResult[nextSeg.id] = true;
+      result.push(nextSeg);
+      // Advance to the other endpoint of nextSeg
+      var ns = snapKey(nextSeg.coords[0]);
+      var ne = snapKey(nextSeg.coords[nextSeg.coords.length - 1]);
+      node = (ns === node) ? ne : ns;
     }
   });
 
