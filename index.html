@@ -1773,11 +1773,12 @@ function getConnectedRun(seg) {
     var node = startNode;
     var prevId = seg.id;
     for (var step = 0; step < 500; step++) {
-      // Stop if this node connects to a different-parent trail (real junction)
-      var hasDifferentParent = (graph[node] || []).some(function(e) {
-        return e.seg.parentSegId !== parent;
+      // Stop only at junctions with same-type features (trail-trail or road-road).
+      // Road crossings on a trail (or trail crossings on a road) are not rider decision points.
+      var hasSameTypeJunction = (graph[node] || []).some(function(e) {
+        return e.seg.parentSegId !== parent && e.seg.isRoad === seg.isRoad;
       });
-      if (hasDifferentParent) break;
+      if (hasSameTypeJunction) break;
 
       // Find next same-parent connected segment (not already in result)
       var next = (graph[node] || []).filter(function(e) {
