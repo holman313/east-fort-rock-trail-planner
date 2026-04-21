@@ -1793,12 +1793,25 @@ function getConnectedRun(seg) {
     var node = startNode;
     for (var step = 0; step < 500; step++) {
       var atNode = idx[node] || [];
-      // Only follow same-parent segments — other trails crossing is not a stop point
-      var next = atNode.filter(function(s) {
-        return s.parentSegId === parent && !inResult[s.id];
+
+      // Collect degenerate same-parent segments (start===end snap key) first —
+      // they must not count as fork options or block chain advancement.
+      atNode.forEach(function(s) {
+        if (s.parentSegId !== parent || inResult[s.id]) return;
+        var ss = snapKey(s.coords[0]);
+        var se = snapKey(s.coords[s.coords.length - 1]);
+        if (ss === se) { inResult[s.id] = true; result.push(s); }
       });
-      if (next.length === 0) break;      // dead end
-      if (next.length > 1) break;        // trail forks — stop here
+
+      // Non-degenerate same-parent candidates determine direction
+      var next = atNode.filter(function(s) {
+        if (s.parentSegId !== parent || inResult[s.id]) return false;
+        var ss = snapKey(s.coords[0]);
+        var se = snapKey(s.coords[s.coords.length - 1]);
+        return ss !== se;
+      });
+      if (next.length === 0) break;  // dead end
+      if (next.length > 1) break;   // trail forks — stop here
 
       var nextSeg = next[0];
       inResult[nextSeg.id] = true;
