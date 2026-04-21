@@ -1,4 +1,4 @@
-const CACHE = 'efr-v1';
+const CACHE = 'efr-v9';
 const PRECACHE = ['index.html', 'trails.geojson', 'roads.geojson', 'bikes.json', 'manifest.json', 'icon-192.svg', 'icon-512.svg'];
 
 self.addEventListener('install', e => {

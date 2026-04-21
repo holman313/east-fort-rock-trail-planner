@@ -511,6 +511,148 @@
     }
     .waypoint-del:hover { color: #e74c3c; }
 
+    /* -- PLAN A RIDE / WEATHER ---------------------------------------- */
+    .weather-date-input {
+      width: 100%; padding: 7px 10px; border: 1px solid #d0d0d0;
+      border-radius: 6px; font-size: 13px; background: #fff; color: #333;
+      cursor: pointer; font-family: 'Roboto', 'Segoe UI', sans-serif;
+    }
+    .weather-date-input:focus { outline: none; border-color: #e06c00; }
+
+    .weather-strip {
+      display: flex; gap: 4px; margin-top: 10px; overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .weather-strip::-webkit-scrollbar { height: 3px; }
+    .weather-strip::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+
+    .wx-day {
+      flex-shrink: 0; width: 36px; text-align: center;
+      border-radius: 6px; padding: 5px 2px; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.12s;
+    }
+    .wx-day:hover { border-color: #e06c00; }
+    .wx-day.selected { border-color: #e06c00; background: #fff7f0; }
+    .wx-day-label { font-size: 9px; font-weight: 700; color: #888; text-transform: uppercase; }
+    .wx-day-icon { font-size: 16px; line-height: 1.4; }
+    .wx-day-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin: 3px auto 0;
+    }
+
+    .wx-card {
+      margin-top: 10px; border-radius: 8px; padding: 10px 12px;
+      border: 1px solid #e8e8e8; background: #f9f9f9;
+    }
+    .wx-card.wx-good   { border-color: #86efac; background: #f0fdf4; }
+    .wx-card.wx-marg   { border-color: #fcd34d; background: #fffbeb; }
+    .wx-card.wx-bad    { border-color: #fca5a5; background: #fef2f2; }
+
+    .wx-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 2px 8px; border-radius: 10px; margin-bottom: 7px;
+    }
+    .wx-badge.good { background: #22c55e; color: #fff; }
+    .wx-badge.marg { background: #f59e0b; color: #fff; }
+    .wx-badge.bad  { background: #ef4444; color: #fff; }
+
+    .wx-row { display: flex; justify-content: space-between; padding: 2px 0; }
+    .wx-lbl { font-size: 11px; color: #666; }
+    .wx-val { font-size: 11px; font-weight: 600; color: #333; }
+
+    .wx-loading { font-size: 11px; color: #aaa; text-align: center; padding: 14px 0; }
+    .wx-error   { font-size: 11px; color: #e74c3c; padding: 8px 0; }
+
+    #wx-range-days { margin-top: 6px; }
+    .wx-range-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 11px;
+    }
+    .wx-range-row:last-child { border-bottom: none; }
+    .wx-range-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .wx-range-date { font-weight: 600; color: #444; flex-shrink: 0; width: 56px; }
+    .wx-range-icon { flex-shrink: 0; font-size: 13px; }
+    .wx-range-desc { flex: 1; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wx-range-temp { font-weight: 600; color: #555; flex-shrink: 0; }
+
+    /* -- TRIPS -------------------------------------------------------- */
+    .trip-card {
+      background: #f9f9f9; border: 1px solid #e8e8e8;
+      border-radius: 8px; margin-bottom: 8px; overflow: hidden;
+    }
+    .trip-card-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .trip-card-header:hover { background: #f0f0f0; }
+    .trip-card-name { font-size: 12px; font-weight: 700; color: #1a1a1a; flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trip-card-dates { font-size: 10px; color: #888; flex-shrink: 0; }
+    .trip-card-del { background: none; border: none; color: #ccc; cursor: pointer;
+      font-size: 14px; padding: 0; flex-shrink: 0; transition: color 0.12s; }
+    .trip-card-del:hover { color: #e74c3c; }
+    .trip-card-chevron { font-size: 12px; color: #aaa; flex-shrink: 0; }
+
+    .trip-detail { border-top: 1px solid #e8e8e8; padding: 10px; display: none; }
+    .trip-detail.open { display: block; }
+
+    .trip-section-lbl {
+      font-size: 10px; font-weight: 700; color: #e06c00;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin: 10px 0 5px;
+    }
+    .trip-section-lbl:first-child { margin-top: 0; }
+
+    .trip-route-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 0; border-bottom: 1px solid #f0f0f0;
+      font-size: 11px;
+    }
+    .trip-route-row:last-child { border-bottom: none; }
+    .trip-route-name { flex: 1; color: #333; }
+    .trip-route-dist { color: #888; font-size: 10px; flex-shrink: 0; }
+    .trip-route-load { background: none; border: 1px solid #ddd; color: #555;
+      font-size: 10px; padding: 2px 6px; border-radius: 3px; cursor: pointer; flex-shrink: 0; }
+    .trip-route-load:hover { border-color: #e06c00; color: #e06c00; }
+    .trip-route-del { background: none; border: none; color: #ccc;
+      font-size: 13px; padding: 0; cursor: pointer; flex-shrink: 0; transition: color 0.12s; }
+    .trip-route-del:hover { color: #e74c3c; }
+
+    .trip-bike-grid { display: flex; flex-direction: column; gap: 4px; }
+    .trip-bike-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 7px; border-radius: 5px;
+      border: 1px solid #e8e8e8; background: #fff;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .trip-bike-row.checked { background: #fff7f0; border-color: #e06c00; }
+    .trip-bike-check { font-size: 14px; flex-shrink: 0; }
+    .trip-bike-name { font-size: 11px; font-weight: 600; color: #333; flex: 1; }
+    .trip-bike-range { font-size: 10px; color: #888; flex-shrink: 0; }
+
+    .trip-add-route-row { display: flex; gap: 6px; margin-top: 6px; }
+    .trip-route-select {
+      flex: 1; padding: 5px 8px; border: 1px solid #d0d0d0;
+      border-radius: 5px; font-size: 11px; background: #fff; color: #333;
+    }
+    .trip-route-select:focus { outline: none; border-color: #e06c00; }
+
+    .trip-new-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .trip-new-input {
+      width: 100%; padding: 6px 10px; border: 1px solid #d0d0d0;
+      border-radius: 5px; font-size: 12px; background: #fff; color: #333;
+      font-family: 'Roboto', 'Segoe UI', sans-serif;
+    }
+    .trip-new-input:focus { outline: none; border-color: #e06c00; }
+    .trip-date-row { display: flex; gap: 6px; }
+    .trip-date-row > div { flex: 1; }
+    .trip-date-lbl { font-size: 10px; color: #888; margin-bottom: 3px; }
+
+    .trip-range-bar { margin-top: 6px; }
+
     /* -- CONTEXT MENU ------------------------------------------------- */
     #ctx-menu {
       display: none;
@@ -739,9 +881,9 @@
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-filters')">
           <span class="s-title" style="margin:0;">Show Trails</span>
-          <span class="cs-chevron" id="chev-cs-filters">&#9660;</span>
+          <span class="cs-chevron" id="chev-cs-filters">&#9654;</span>
         </div>
-        <div class="cs-body" id="cs-filters">
+        <div class="cs-body collapsed" id="cs-filters">
           <div class="cs-pad">
             <label class="f-row">
               <md-checkbox id="f-easy" checked onchange="applyFilters()"></md-checkbox>
@@ -768,50 +910,13 @@
         </div>
       </div>
 
-      <!-- Loop Planner (collapsed by default) -->
-      <div class="cs-wrap">
-        <div class="cs-header" onclick="toggleSection('cs-loop')">
-          <span class="s-title" style="margin:0;">&#x1F504; Loop Planner</span>
-          <span class="cs-chevron" id="chev-cs-loop">&#9654;</span>
-        </div>
-        <div class="cs-body collapsed" id="cs-loop">
-          <div class="cs-pad">
-            <div class="loop-field">
-              <label class="loop-label">Staging Area</label>
-              <select id="loop-staging" class="loop-select">
-                <option value="0">Camp II Staging</option>
-                <option value="1">China Hat Campground</option>
-                <option value="2">Road 25 Staging</option>
-                <option value="3">Road 2510 Staging</option>
-                <option value="4">South Lava Staging</option>
-              </select>
-            </div>
-            <div class="loop-field">
-              <label class="loop-label">Target Distance — <span id="loop-miles-val">15</span> mi</label>
-              <input type="range" id="loop-miles" class="loop-slider"
-                     min="5" max="100" value="15" step="5"
-                     oninput="document.getElementById('loop-miles-val').textContent=this.value">
-              <div class="loop-slider-labels"><span>5</span><span>100</span></div>
-            </div>
-            <div class="loop-field">
-              <label class="f-row" style="margin:0;">
-                <md-checkbox id="loop-no-roads" checked></md-checkbox>
-                <span class="f-label">Trails only (no shared roads)</span>
-              </label>
-            </div>
-            <md-filled-button id="loop-find-btn" onclick="runLoopPlanner()" style="width:100%;margin-top:6px;">&#x1F50D; Find Loop</md-filled-button>
-            <div id="loop-result"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Your Route (open by default) -->
+      <!-- Your Route -->
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-route')">
           <span class="s-title" style="margin:0;">Your Route</span>
-          <span class="cs-chevron" id="chev-cs-route">&#9660;</span>
+          <span class="cs-chevron" id="chev-cs-route">&#9654;</span>
         </div>
-        <div class="cs-body" id="cs-route">
+        <div class="cs-body collapsed" id="cs-route">
           <div class="cs-pad">
             <div id="total-miles-display">
               <span id="st-dist-big">0.0</span><span class="total-miles-unit"> mi</span>
@@ -848,19 +953,14 @@
                 </div>
               </div>
             </div>
-            <!-- Elevation Profile -->
             <div id="elev-section" style="display:none;margin-top:12px;">
               <div class="elev-label">Elevation Profile</div>
               <div id="elev-loading" class="elev-loading">Fetching elevation data…</div>
               <svg id="elev-chart" width="100%" height="72" style="display:none;"></svg>
               <div id="elev-stats" class="elev-stats"></div>
             </div>
-
             <div style="margin-top:10px;">
-              <div class="empty-state" id="empty-msg">
-                <div class="icon">&#x1F5FA;&#xFE0F;</div>
-                <p>Click any trail segment on the map to add it to your route.</p>
-              </div>
+              <div id="empty-msg" style="font-size:11px;color:#bbb;text-align:center;padding:8px 0;">Click a trail segment to add it to your route.</div>
               <div id="route-list"></div>
             </div>
             <div class="btn-row" style="margin-top:10px;">
@@ -871,49 +971,48 @@
         </div>
       </div>
 
-      <!-- Garage (collapsed by default) -->
+      <!-- Loop Planner -->
       <div class="cs-wrap">
-        <div class="cs-header" onclick="toggleSection('cs-garage')">
-          <span class="s-title" style="margin:0;">&#9968; Garage</span>
-          <span class="cs-chevron" id="chev-cs-garage"">&#9654;</span>
+        <div class="cs-header" onclick="toggleSection('cs-loop')">
+          <span class="s-title" style="margin:0;">&#x1F504; Loop Planner</span>
+          <span class="cs-chevron" id="chev-cs-loop">&#9654;</span>
         </div>
-        <div class="cs-body collapsed" id="cs-garage">
+        <div class="cs-body collapsed" id="cs-loop">
           <div class="cs-pad">
-            <div class="bike-search-wrap">
-              <input type="text" class="bike-search-input" id="bike-search"
-                     placeholder="Search make or model…"
-                     oninput="renderGarageSearch(this.value)"
-                     onblur="setTimeout(function(){document.getElementById('bike-search-results').innerHTML='';},200)">
-              <div id="bike-search-results"></div>
+            <div class="loop-field">
+              <label class="loop-label">Staging Area</label>
+              <select id="loop-staging" class="loop-select">
+                <option value="0">Camp II Staging</option>
+                <option value="1">China Hat Campground</option>
+                <option value="2">Road 25 Staging</option>
+                <option value="3">Road 2510 Staging</option>
+                <option value="4">South Lava Staging</option>
+              </select>
             </div>
-            <div id="garage-list"></div>
-            <div id="range-warning" style="display:none;"></div>
+            <div class="loop-field">
+              <label class="loop-label">Target Distance — <span id="loop-miles-val">15</span> mi</label>
+              <input type="range" id="loop-miles" class="loop-slider"
+                     min="5" max="100" value="15" step="5"
+                     oninput="document.getElementById('loop-miles-val').textContent=this.value">
+              <div class="loop-slider-labels"><span>5</span><span>100</span></div>
+            </div>
+            <div class="loop-field">
+              <label class="f-row" style="margin:0;">
+                <md-checkbox id="loop-no-roads" checked></md-checkbox>
+                <span class="f-label">Trails only (no shared roads)</span>
+              </label>
+            </div>
+            <md-filled-button id="loop-find-btn" onclick="runLoopPlanner()" style="width:100%;margin-top:6px;">&#x1F50D; Find Loop</md-filled-button>
+            <div id="loop-result"></div>
           </div>
         </div>
       </div>
 
-      <!-- Waypoints (collapsed by default) -->
-      <div class="cs-wrap">
-        <div class="cs-header" onclick="toggleSection('cs-waypoints')">
-          <span class="s-title" style="margin:0;">&#128205; Waypoints</span>
-          <span class="cs-chevron" id="chev-cs-waypoints"">&#9654;</span>
-        </div>
-        <div class="cs-body collapsed" id="cs-waypoints">
-          <div class="cs-pad">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-              <span style="font-size:11px;color:#888;">Tap "+ Add" then tap the map</span>
-              <md-outlined-button id="waypoint-mode-btn" onclick="toggleWaypointMode()">+ Add</md-outlined-button>
-            </div>
-            <div id="waypoint-list"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Saved Routes (collapsed by default) -->
+      <!-- Saved Routes -->
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-saved')">
           <span class="s-title" style="margin:0;">Saved Routes</span>
-          <span class="cs-chevron" id="chev-cs-saved"">&#9654;</span>
+          <span class="cs-chevron" id="chev-cs-saved">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-saved">
           <div class="cs-pad">
@@ -927,11 +1026,76 @@
         </div>
       </div>
 
-      <!-- Share & Export (collapsed by default) -->
+      <!-- Trips -->
+      <div class="cs-wrap">
+        <div class="cs-header" onclick="toggleSection('cs-trips')">
+          <span class="s-title" style="margin:0;">&#127956; Trips</span>
+          <span class="cs-chevron" id="chev-cs-trips">&#9654;</span>
+        </div>
+        <div class="cs-body collapsed" id="cs-trips">
+          <div class="cs-pad">
+            <div class="trip-new-row">
+              <input type="text" id="trip-name-input" class="trip-new-input" placeholder="Trip name…" maxlength="40">
+              <div class="trip-date-row">
+                <div>
+                  <div class="trip-date-lbl">Start</div>
+                  <input type="date" id="trip-start-input" class="weather-date-input" style="font-size:11px;padding:5px 8px;">
+                </div>
+                <div>
+                  <div class="trip-date-lbl">End</div>
+                  <input type="date" id="trip-end-input" class="weather-date-input" style="font-size:11px;padding:5px 8px;">
+                </div>
+              </div>
+              <md-filled-button onclick="createTrip()" style="width:100%;">+ Create Trip</md-filled-button>
+            </div>
+            <div id="trips-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Bikes -->
+      <div class="cs-wrap">
+        <div class="cs-header" onclick="toggleSection('cs-mybikes')">
+          <span class="s-title" style="margin:0;">&#9968; My Bikes</span>
+          <span class="cs-chevron" id="chev-cs-mybikes">&#9654;</span>
+        </div>
+        <div class="cs-body collapsed" id="cs-mybikes">
+          <div class="cs-pad">
+            <div class="bike-search-wrap">
+              <input type="text" class="bike-search-input" id="bike-search"
+                     placeholder="Search make or model to add a bike…"
+                     oninput="renderGarageSearch(this.value)"
+                     onblur="setTimeout(function(){document.getElementById('bike-search-results').innerHTML='';},200)">
+              <div id="bike-search-results"></div>
+              <div style="font-size:10px;color:#bbb;margin-top:4px;">Tap a result to add it to your garage</div>
+            </div>
+            <div id="garage-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waypoints -->
+      <div class="cs-wrap">
+        <div class="cs-header" onclick="toggleSection('cs-waypoints')">
+          <span class="s-title" style="margin:0;">&#128205; Waypoints</span>
+          <span class="cs-chevron" id="chev-cs-waypoints">&#9654;</span>
+        </div>
+        <div class="cs-body collapsed" id="cs-waypoints">
+          <div class="cs-pad">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:11px;color:#888;">Tap "+ Add" then tap the map</span>
+              <md-outlined-button id="waypoint-mode-btn" onclick="toggleWaypointMode()">+ Add</md-outlined-button>
+            </div>
+            <div id="waypoint-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share & Export -->
       <div class="cs-wrap">
         <div class="cs-header" onclick="toggleSection('cs-share')">
           <span class="s-title" style="margin:0;">Share &amp; Export</span>
-          <span class="cs-chevron" id="chev-cs-share"">&#9654;</span>
+          <span class="cs-chevron" id="chev-cs-share">&#9654;</span>
         </div>
         <div class="cs-body collapsed" id="cs-share">
           <div class="cs-pad">
@@ -2145,21 +2309,29 @@ function renderSavedRoutes() {
 }
 
 // =====================================================================
-// GARAGE
+// MY BIKES (GARAGE)
 // =====================================================================
 var _bikeDB = [];
 
-function getGarage() {
-  try { return JSON.parse(localStorage.getItem('efr_garage') || '[]'); } catch(e) { return []; }
+function getMyBikes() {
+  try {
+    var v = localStorage.getItem('efr_my_bikes');
+    if (!v) {
+      var legacy = localStorage.getItem('efr_garage');
+      if (legacy) { localStorage.setItem('efr_my_bikes', legacy); return JSON.parse(legacy); }
+    }
+    return JSON.parse(v || '[]');
+  } catch(e) { return []; }
 }
-function saveGarage(arr) {
-  localStorage.setItem('efr_garage', JSON.stringify(arr));
-}
+function saveMyBikes(arr) { localStorage.setItem('efr_my_bikes', JSON.stringify(arr)); }
+
+// keep old names as aliases so nothing else breaks
+function getGarage() { return getMyBikes(); }
+function saveGarage(arr) { saveMyBikes(arr); }
 
 function bikeByKey(key) {
   return _bikeDB.find(function(b) { return b.make + '|' + b.model === key; }) || null;
 }
-
 function bikeRangeInfo(entry) {
   var bike = bikeByKey(entry.bikeKey);
   if (!bike) return null;
@@ -2167,44 +2339,30 @@ function bikeRangeInfo(entry) {
   return { bike: bike, range: bike.tankGal * mpg, mpg: mpg };
 }
 
-function getLimitingBike() {
-  var garage = getGarage();
-  if (!garage.length) return null;
-  return garage.reduce(function(worst, entry) {
-    var r = bikeRangeInfo(entry);
-    if (!r) return worst;
-    if (!worst || r.range < worst.range) return r;
-    return worst;
-  }, null);
-}
-
 function addBikeToGarage(make, model) {
   var key = make + '|' + model;
-  var garage = getGarage();
-  if (garage.find(function(e) { return e.bikeKey === key; })) return;
-  garage.push({ bikeKey: key, customMpg: null });
-  saveGarage(garage);
+  var bikes = getMyBikes();
+  if (bikes.find(function(e) { return e.bikeKey === key; })) return;
+  bikes.push({ bikeKey: key, customMpg: null });
+  saveMyBikes(bikes);
   document.getElementById('bike-search').value = '';
   document.getElementById('bike-search-results').innerHTML = '';
   renderGarage();
-  renderRangeWarning();
 }
-
 function removeBikeFromGarage(idx) {
-  var garage = getGarage();
-  garage.splice(idx, 1);
-  saveGarage(garage);
+  var bikes = getMyBikes();
+  bikes.splice(idx, 1);
+  saveMyBikes(bikes);
   renderGarage();
-  renderRangeWarning();
+  renderTrips();
 }
-
 function updateCustomMpg(idx, val) {
-  var garage = getGarage();
+  var bikes = getMyBikes();
   var n = parseFloat(val);
-  garage[idx].customMpg = (!isNaN(n) && n > 0) ? n : null;
-  saveGarage(garage);
+  bikes[idx].customMpg = (!isNaN(n) && n > 0) ? n : null;
+  saveMyBikes(bikes);
   renderGarage();
-  renderRangeWarning();
+  renderTrips();
 }
 
 function renderGarageSearch(query) {
@@ -2214,43 +2372,34 @@ function renderGarageSearch(query) {
   var matches = _bikeDB.filter(function(b) {
     return (b.make + ' ' + b.model).toLowerCase().indexOf(q) >= 0;
   }).slice(0, 7);
-  if (!matches.length) {
-    results.innerHTML = '<div class="bike-no-results">No bikes found</div>';
-    return;
-  }
+  if (!matches.length) { results.innerHTML = '<div class="bike-no-results">No bikes found</div>'; return; }
   results.innerHTML = matches.map(function(b) {
-    var safe = (b.make + '|' + b.model).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     return '<div class="bike-result" onclick="addBikeToGarage(\'' +
         b.make.replace(/'/g,"\\'") + '\',\'' + b.model.replace(/'/g,"\\'") + '\')">' +
-      '<span class="bike-result-name">' + b.make + ' ' + b.model + '</span>' +
-      '<span class="bike-result-info">' + b.cc + 'cc &middot; ' + b.stroke + 'T &middot; ' + b.tankGal.toFixed(1) + ' gal</span>' +
+      '<div>' +
+        '<div class="bike-result-name">' + b.make + ' ' + b.model + '</div>' +
+        '<div class="bike-result-info">' + b.cc + 'cc &middot; ' + b.stroke + 'T &middot; ' + b.tankGal.toFixed(1) + ' gal</div>' +
+      '</div>' +
+      '<span style="font-size:10px;font-weight:700;color:#e06c00;flex-shrink:0;">+ Add</span>' +
     '</div>';
   }).join('');
 }
 
 function renderGarage() {
-  var garage = getGarage();
+  var bikes = getMyBikes();
   var list = document.getElementById('garage-list');
   if (!list) return;
-
-  if (!garage.length) {
-    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:6px 0;">Search above to add bikes for your group ride</div>';
+  if (!bikes.length) {
+    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:6px 0;">Search above to add your bikes</div>';
     return;
   }
-
-  var infos = garage.map(function(entry, i) {
+  list.innerHTML = bikes.map(function(entry, i) {
     var r = bikeRangeInfo(entry);
-    return r ? { idx: i, entry: entry, bike: r.bike, range: r.range, mpg: r.mpg } : null;
-  }).filter(Boolean);
-
-  var minRange = infos.length ? Math.min.apply(null, infos.map(function(r) { return r.range; })) : Infinity;
-
-  list.innerHTML = infos.map(function(r) {
-    var isLimiting = r.range === minRange && infos.length > 1;
-    return '<div class="garage-bike' + (isLimiting ? ' garage-limiting' : '') + '">' +
+    if (!r) return '';
+    return '<div class="garage-bike">' +
       '<div class="garage-bike-header">' +
-        '<span class="garage-bike-name">' + (isLimiting ? '&#9888; ' : '') + r.bike.make + ' ' + r.bike.model + '</span>' +
-        '<button class="garage-remove" onclick="removeBikeFromGarage(' + r.idx + ')" title="Remove">&#10005;</button>' +
+        '<span class="garage-bike-name">' + r.bike.make + ' ' + r.bike.model + '</span>' +
+        '<button class="garage-remove" onclick="removeBikeFromGarage(' + i + ')" title="Remove">&#10005;</button>' +
       '</div>' +
       '<div class="garage-bike-meta">' +
         r.bike.cc + 'cc &middot; ' + r.bike.stroke + '-stroke &middot; ' + r.bike.tankGal.toFixed(1) + ' gal &middot; ' +
@@ -2259,51 +2408,267 @@ function renderGarage() {
       '<div class="garage-mpg-row">' +
         '<span class="garage-mpg-lbl">Trail MPG:</span>' +
         '<input type="number" class="garage-mpg-input" value="' + Math.round(r.mpg) + '" min="10" max="80" ' +
-          'onchange="updateCustomMpg(' + r.idx + ',this.value)" title="Adjust for your riding style">' +
+          'onchange="updateCustomMpg(' + i + ',this.value)">' +
         '<span class="garage-mpg-hint">(est.)</span>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-function renderRangeWarning() {
-  var el = document.getElementById('range-warning');
-  if (!el) return;
+// =====================================================================
+// TRIPS
+// =====================================================================
+function getTrips() {
+  try { return JSON.parse(localStorage.getItem('efr_trips') || '[]'); } catch(e) { return []; }
+}
+function saveTrips(arr) { localStorage.setItem('efr_trips', JSON.stringify(arr)); }
 
-  var limiting = getLimitingBike();
-  var routeMiles = routeOrder.reduce(function(sum, id) {
-    var seg = allSegsMap.get(id);
-    return sum + (seg ? seg.miles : 0);
-  }, 0);
+function tripDateLabel(start, end) {
+  if (!start) return '';
+  var fmt = function(s) {
+    var d = new Date(s + 'T12:00:00');
+    return (d.getMonth()+1) + '/' + d.getDate();
+  };
+  return start === end ? fmt(start) : fmt(start) + '–' + fmt(end);
+}
 
-  if (!limiting) { el.style.display = 'none'; return; }
+function initTripDates() {
+  var today = new Date();
+  var pad = function(n) { return String(n).padStart(2,'0'); };
+  var fmt = function(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); };
+  var todayStr = fmt(today);
+  var end = new Date(today); end.setDate(today.getDate() + 2);
+  document.getElementById('trip-start-input').value = todayStr;
+  document.getElementById('trip-end-input').value = fmt(end);
+}
 
-  el.style.display = 'block';
-  var pct = routeMiles > 0 ? routeMiles / limiting.range : 0;
-  var pctDisplay = Math.min(100, Math.round(pct * 100));
+function createTrip() {
+  var name = (document.getElementById('trip-name-input').value || '').trim();
+  var start = document.getElementById('trip-start-input').value;
+  var end = document.getElementById('trip-end-input').value;
+  if (!name) { document.getElementById('trip-name-input').focus(); return; }
+  if (!start) { document.getElementById('trip-start-input').focus(); return; }
+  if (!end || end < start) end = start;
+  var trips = getTrips();
+  trips.push({ id: String(Date.now()), name: name, startDate: start, endDate: end, routeNames: [], bikeKeys: [] });
+  saveTrips(trips);
+  document.getElementById('trip-name-input').value = '';
+  renderTrips();
+}
 
-  var color, label;
-  if (pct >= 1.0) {
-    color = '#e74c3c';
-    label = '&#9888; Exceeds range &mdash; ' + limiting.bike.make + ' ' + limiting.bike.model;
-  } else if (pct >= 0.75) {
-    color = '#facc15';
-    label = '&#9888; Approaching limit &mdash; ' + limiting.bike.make + ' ' + limiting.bike.model;
-  } else {
-    color = '#2ecc71';
-    label = '&#10003; Within range &mdash; ' + (limiting.bike ? limiting.bike.make + ' ' + limiting.bike.model : 'all bikes');
+function deleteTrip(id) {
+  if (!confirm('Delete this trip?')) return;
+  var trips = getTrips().filter(function(t) { return t.id !== id; });
+  saveTrips(trips);
+  renderTrips();
+}
+
+function toggleTripBike(tripId, bikeKey) {
+  var trips = getTrips();
+  var trip = trips.find(function(t) { return t.id === tripId; });
+  if (!trip) return;
+  var idx = trip.bikeKeys.indexOf(bikeKey);
+  if (idx >= 0) trip.bikeKeys.splice(idx, 1);
+  else trip.bikeKeys.push(bikeKey);
+  saveTrips(trips);
+  renderTrips();
+}
+
+function addRouteToTrip(tripId) {
+  var sel = document.getElementById('trip-route-sel-' + tripId);
+  if (!sel || !sel.value) return;
+  var trips = getTrips();
+  var trip = trips.find(function(t) { return t.id === tripId; });
+  if (!trip || trip.routeNames.includes(sel.value)) return;
+  trip.routeNames.push(sel.value);
+  saveTrips(trips);
+  renderTrips();
+}
+
+function removeRouteFromTrip(tripId, routeName) {
+  var trips = getTrips();
+  var trip = trips.find(function(t) { return t.id === tripId; });
+  if (!trip) return;
+  trip.routeNames = trip.routeNames.filter(function(n) { return n !== routeName; });
+  saveTrips(trips);
+  renderTrips();
+}
+
+function loadTripRoute(routeName) {
+  var routes = getSavedRoutes();
+  var route = routes.find(function(r) { return r.name === routeName; });
+  if (!route) return;
+  clearRoute();
+  route.segIds.forEach(function(segId) {
+    var seg = allSegsBySegId.get(segId);
+    if (seg) toggleSegment(seg);
+  });
+}
+
+function tripRangeHtml(trip) {
+  var bikes = getMyBikes();
+  var tripBikes = trip.bikeKeys.map(function(key) {
+    var entry = bikes.find(function(b) { return b.bikeKey === key; });
+    return entry ? bikeRangeInfo(entry) : null;
+  }).filter(Boolean);
+  if (!tripBikes.length) return '';
+
+  var totalMiles = (getSavedRoutes().filter(function(r) { return trip.routeNames.includes(r.name); })
+    .reduce(function(sum, r) { return sum + r.totalMiles; }, 0));
+
+  var limiting = tripBikes.reduce(function(w, r) { return (!w || r.range < w.range) ? r : w; }, null);
+  if (!limiting) return '';
+
+  var pct = totalMiles > 0 ? Math.min(1, totalMiles / limiting.range) : 0;
+  var pctDisplay = Math.round(pct * 100);
+  var color = pct >= 1 ? '#e74c3c' : pct >= 0.75 ? '#f59e0b' : '#22c55e';
+  var label = pct >= 1 ? '&#9888; Exceeds range' : pct >= 0.75 ? '&#9888; Approaching limit' : '&#10003; Within range';
+
+  return '<div class="trip-range-bar">' +
+    '<div style="font-size:10px;color:' + color + ';margin-bottom:4px;">' + label +
+      ' &mdash; limiting: ' + limiting.bike.make + ' ' + limiting.bike.model +
+      ' (' + Math.round(limiting.range) + ' mi)</div>' +
+    '<div style="background:#eee;border-radius:3px;height:6px;overflow:hidden;">' +
+      '<div style="width:' + pctDisplay + '%;height:100%;background:' + color + ';border-radius:3px;transition:width 0.3s;"></div>' +
+    '</div>' +
+    '<div style="display:flex;justify-content:space-between;margin-top:2px;">' +
+      '<span style="font-size:10px;color:#888;">' + totalMiles.toFixed(1) + ' mi planned</span>' +
+      '<span style="font-size:10px;color:#888;">' + pctDisplay + '% of range</span>' +
+    '</div>' +
+  '</div>';
+}
+
+var _tripOpenIds = {};
+
+function renderTrips() {
+  var list = document.getElementById('trips-list');
+  if (!list) return;
+  var trips = getTrips();
+  var bikes = getMyBikes();
+  var savedRoutes = getSavedRoutes();
+
+  if (!trips.length) {
+    list.innerHTML = '<div style="font-size:10px;color:#aaa;text-align:center;padding:8px 0;">No trips yet — create one above</div>';
+    return;
   }
 
-  el.style.borderLeftColor = color;
-  el.innerHTML =
-    '<div style="font-size:10px;color:' + color + ';margin-bottom:5px;">' + label + '</div>' +
-    '<div style="background:#1e3050;border-radius:3px;height:7px;overflow:hidden;">' +
-      '<div style="width:' + pctDisplay + '%;height:100%;background:' + color + ';transition:width 0.3s;border-radius:3px;"></div>' +
-    '</div>' +
-    '<div style="display:flex;justify-content:space-between;margin-top:3px;">' +
-      '<span style="font-size:10px;color:#888;">' + routeMiles.toFixed(1) + ' mi planned</span>' +
-      '<span style="font-size:10px;color:#888;">' + Math.round(limiting.range) + ' mi range &middot; ' + pctDisplay + '%</span>' +
+  list.innerHTML = trips.map(function(trip) {
+    var isOpen = !!_tripOpenIds[trip.id];
+    var dateLabel = tripDateLabel(trip.startDate, trip.endDate);
+
+    var detailHtml = '';
+    if (isOpen) {
+      // Routes
+      var routeRows = trip.routeNames.length
+        ? trip.routeNames.map(function(name) {
+            var r = savedRoutes.find(function(x) { return x.name === name; });
+            var dist = r ? r.totalMiles.toFixed(1) + ' mi' : '';
+            return '<div class="trip-route-row">' +
+              '<span class="trip-route-name">' + name + '</span>' +
+              '<span class="trip-route-dist">' + dist + '</span>' +
+              '<button class="trip-route-load" onclick="loadTripRoute(\'' + name.replace(/'/g,"\\'") + '\')">Load</button>' +
+              '<button class="trip-route-del" onclick="removeRouteFromTrip(\'' + trip.id + '\',\'' + name.replace(/'/g,"\\'") + '\')">&#10005;</button>' +
+            '</div>';
+          }).join('')
+        : '<div style="font-size:10px;color:#bbb;padding:2px 0;">No routes added yet</div>';
+
+      var availableRoutes = savedRoutes.filter(function(r) { return !trip.routeNames.includes(r.name); });
+      var routeSelectHtml = availableRoutes.length
+        ? '<div class="trip-add-route-row">' +
+            '<select class="trip-route-select" id="trip-route-sel-' + trip.id + '">' +
+              availableRoutes.map(function(r) { return '<option value="' + r.name.replace(/"/g,'&quot;') + '">' + r.name + ' (' + r.totalMiles.toFixed(1) + ' mi)</option>'; }).join('') +
+            '</select>' +
+            '<md-filled-button onclick="addRouteToTrip(\'' + trip.id + '\')" style="flex-shrink:0;">Add</md-filled-button>' +
+          '</div>'
+        : '<div style="font-size:10px;color:#bbb;margin-top:4px;">' + (savedRoutes.length ? 'All saved routes added' : 'Save a route first') + '</div>';
+
+      // Bikes
+      var bikeGrid = bikes.length
+        ? '<div class="trip-bike-grid">' +
+            bikes.map(function(entry) {
+              var r = bikeRangeInfo(entry);
+              if (!r) return '';
+              var checked = trip.bikeKeys.includes(entry.bikeKey);
+              return '<div class="trip-bike-row' + (checked ? ' checked' : '') + '" onclick="toggleTripBike(\'' + trip.id + '\',\'' + entry.bikeKey.replace(/'/g,"\\'") + '\')">' +
+                '<span class="trip-bike-check">' + (checked ? '&#9989;' : '&#9744;') + '</span>' +
+                '<span class="trip-bike-name">' + r.bike.make + ' ' + r.bike.model + '</span>' +
+                '<span class="trip-bike-range">' + Math.round(r.range) + ' mi</span>' +
+              '</div>';
+            }).join('') +
+          '</div>'
+        : '<div style="font-size:10px;color:#bbb;">Add bikes to My Bikes first</div>';
+
+      // Weather
+      var wxHtml = '<div id="trip-wx-' + trip.id + '" style="margin-top:4px;"><div class="wx-loading">Loading forecast…</div></div>';
+
+      detailHtml =
+        '<div class="trip-detail open">' +
+          '<div class="trip-section-lbl">Routes</div>' +
+          routeRows + routeSelectHtml +
+          '<div class="trip-section-lbl" style="margin-top:10px;">Bikes on This Trip</div>' +
+          bikeGrid +
+          tripRangeHtml(trip) +
+          '<div class="trip-section-lbl" style="margin-top:10px;">Weather</div>' +
+          wxHtml +
+          '<button onclick="deleteTrip(\'' + trip.id + '\')" style="margin-top:10px;width:100%;background:none;border:1px solid #fca5a5;color:#e74c3c;border-radius:5px;padding:5px;font-size:11px;cursor:pointer;">Delete Trip</button>' +
+        '</div>';
+    }
+
+    return '<div class="trip-card">' +
+      '<div class="trip-card-header" onclick="toggleTripOpen(\'' + trip.id + '\')">' +
+        '<span class="trip-card-name">' + trip.name + '</span>' +
+        '<span class="trip-card-dates">' + dateLabel + '</span>' +
+        '<span class="trip-card-chevron">' + (isOpen ? '&#9660;' : '&#9654;') + '</span>' +
+      '</div>' +
+      detailHtml +
     '</div>';
+  }).join('');
+
+  // Load weather for open trips
+  trips.forEach(function(trip) {
+    if (_tripOpenIds[trip.id]) loadTripWeather(trip);
+  });
+}
+
+function toggleTripOpen(id) {
+  _tripOpenIds[id] = !_tripOpenIds[id];
+  renderTrips();
+}
+
+async function loadTripWeather(trip) {
+  var el = document.getElementById('trip-wx-' + trip.id);
+  if (!el) return;
+  try {
+    var days = await fetchWxData();
+    var rangeDays = days.filter(function(d) { return d.date >= trip.startDate && d.date <= trip.endDate; });
+    if (!rangeDays.length) {
+      el.innerHTML = '<div style="font-size:10px;color:#aaa;">Outside 14-day forecast window</div>';
+      return;
+    }
+    var ratings = rangeDays.map(wxRideability);
+    var overall = ratings.includes('bad') ? 'bad' : ratings.includes('marg') ? 'marg' : 'good';
+    var overallLabel = overall === 'good' ? 'Great conditions' : overall === 'marg' ? 'Some marginal days' : 'Poor — consider rescheduling';
+    var dotColor = overall === 'good' ? '#22c55e' : overall === 'marg' ? '#f59e0b' : '#ef4444';
+    var rows = rangeDays.map(function(day) {
+      var r = wxRideability(day);
+      var dc = r === 'good' ? '#22c55e' : r === 'marg' ? '#f59e0b' : '#ef4444';
+      var d = new Date(day.date + 'T12:00:00');
+      var lbl = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] + ' ' + (d.getMonth()+1) + '/' + d.getDate();
+      return '<div class="wx-range-row">' +
+        '<span class="wx-range-dot" style="background:' + dc + '"></span>' +
+        '<span class="wx-range-date">' + lbl + '</span>' +
+        '<span class="wx-range-icon">' + (WMO_ICONS[day.code]||'❓') + '</span>' +
+        '<span class="wx-range-desc">' + (WMO_DESC[day.code]||'') + '</span>' +
+        '<span class="wx-range-temp">' + day.tmin + '–' + day.tmax + '°</span>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">' +
+      '<span style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;display:inline-block;"></span>' +
+      '<span style="font-size:11px;font-weight:600;color:#333;">' + overallLabel + '</span>' +
+    '</div>' + rows;
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:10px;color:#e74c3c;">Could not load forecast</div>';
+  }
 }
 
 // =====================================================================
@@ -2667,6 +3032,156 @@ function clearGPXImport() {
 }
 
 // =====================================================================
+// WEATHER / PLAN A RIDE
+// =====================================================================
+var WX_LAT = 43.730, WX_LON = -121.055;
+var _wxData = null;
+var _wxSelectedIdx = null;
+
+var WMO_ICONS = {
+  0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+  45:'🌫️', 48:'🌫️',
+  51:'🌦️', 53:'🌦️', 55:'🌦️',
+  61:'🌧️', 63:'🌧️', 65:'🌧️',
+  71:'🌨️', 73:'🌨️', 75:'🌨️', 77:'🌨️',
+  80:'🌦️', 81:'🌦️', 82:'🌧️',
+  85:'🌨️', 86:'🌨️',
+  95:'⛈️', 96:'⛈️', 99:'⛈️'
+};
+
+var WMO_DESC = {
+  0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+  45:'Foggy', 48:'Foggy',
+  51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
+  61:'Light rain', 63:'Rain', 65:'Heavy rain',
+  71:'Light snow', 73:'Snow', 75:'Heavy snow', 77:'Snow grains',
+  80:'Rain showers', 81:'Rain showers', 82:'Heavy showers',
+  85:'Snow showers', 86:'Heavy snow showers',
+  95:'Thunderstorm', 96:'Thunderstorm w/ hail', 99:'Thunderstorm w/ hail'
+};
+
+function wxRideability(day) {
+  var precip = day.precip || 0;
+  var tmin = day.tmin;
+  var wind = day.wind;
+  var code = day.code;
+  var BAD_CODES  = [65,75,82,86,95,96,99];
+  var MARG_CODES = [51,53,55,61,63,71,73,77,80,81,85];
+  if (precip > 0.25 || tmin < 28 || wind > 35 || BAD_CODES.includes(code)) return 'bad';
+  if (precip > 0.05 || tmin < 34 || wind > 22 || MARG_CODES.includes(code)) return 'marg';
+  return 'good';
+}
+
+function wxBadgeLabel(r) {
+  return r === 'good' ? 'Great Conditions' : r === 'marg' ? 'Marginal Conditions' : 'Avoid — Poor Conditions';
+}
+
+async function fetchWxData() {
+  if (_wxData) return _wxData;
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + WX_LAT +
+    '&longitude=' + WX_LON +
+    '&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max' +
+    '&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch' +
+    '&timezone=America%2FLos_Angeles&forecast_days=14';
+  var resp = await fetch(url);
+  var json = await resp.json();
+  var d = json.daily;
+  _wxData = d.time.map(function(date, i) {
+    return {
+      date: date,
+      code: d.weathercode[i],
+      tmax: Math.round(d.temperature_2m_max[i]),
+      tmin: Math.round(d.temperature_2m_min[i]),
+      precip: d.precipitation_sum[i],
+      wind: Math.round(d.windspeed_10m_max[i])
+    };
+  });
+  return _wxData;
+}
+
+function wxDayLabel(dateStr) {
+  var d = new Date(dateStr + 'T12:00:00');
+  return ['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()];
+}
+
+function renderWxStrip(days, startDate, endDate) {
+  var strip = document.getElementById('wx-strip');
+  strip.innerHTML = '';
+  days.forEach(function(day) {
+    var r = wxRideability(day);
+    var dotColor = r === 'good' ? '#22c55e' : r === 'marg' ? '#f59e0b' : '#ef4444';
+    var inRange = startDate && endDate && day.date >= startDate && day.date <= endDate;
+    var div = document.createElement('div');
+    div.className = 'wx-day' + (inRange ? ' selected' : '');
+    div.innerHTML =
+      '<div class="wx-day-label">' + wxDayLabel(day.date) + '</div>' +
+      '<div class="wx-day-icon">' + (WMO_ICONS[day.code] || '❓') + '</div>' +
+      '<div class="wx-day-dot" style="background:' + dotColor + '"></div>';
+    strip.appendChild(div);
+  });
+}
+
+function renderWxRangeCard(rangeDays) {
+  var card = document.getElementById('wx-card');
+  if (!rangeDays.length) { card.innerHTML = ''; card.className = ''; return; }
+
+  var ratings = rangeDays.map(wxRideability);
+  var overall = ratings.includes('bad') ? 'bad' : ratings.includes('marg') ? 'marg' : 'good';
+  var overallLabel = overall === 'good' ? 'Trip looks great' : overall === 'marg' ? 'Some marginal days' : 'Poor conditions — consider rescheduling';
+
+  var rows = rangeDays.map(function(day) {
+    var r = wxRideability(day);
+    var dotColor = r === 'good' ? '#22c55e' : r === 'marg' ? '#f59e0b' : '#ef4444';
+    var icon = WMO_ICONS[day.code] || '❓';
+    var desc = WMO_DESC[day.code] || '';
+    var d = new Date(day.date + 'T12:00:00');
+    var label = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] + ' ' + (d.getMonth()+1) + '/' + d.getDate();
+    return '<div class="wx-range-row">' +
+      '<span class="wx-range-dot" style="background:' + dotColor + '"></span>' +
+      '<span class="wx-range-date">' + label + '</span>' +
+      '<span class="wx-range-icon">' + icon + '</span>' +
+      '<span class="wx-range-desc">' + desc + '</span>' +
+      '<span class="wx-range-temp">' + day.tmin + '–' + day.tmax + '°</span>' +
+    '</div>';
+  }).join('');
+
+  card.className = 'wx-card wx-' + overall;
+  card.innerHTML =
+    '<span class="wx-badge ' + overall + '">' + overallLabel + '</span>' +
+    '<div id="wx-range-days">' + rows + '</div>';
+}
+
+async function onWxRangeChange() {
+  var startStr = document.getElementById('wx-start-input').value;
+  var endStr   = document.getElementById('wx-end-input').value;
+  if (!startStr) return;
+  if (!endStr || endStr < startStr) {
+    document.getElementById('wx-end-input').value = startStr;
+    endStr = startStr;
+  }
+  var card = document.getElementById('wx-card');
+  card.className = '';
+  card.innerHTML = '<div class="wx-loading">Fetching forecast…</div>';
+  document.getElementById('wx-strip').innerHTML = '';
+  try {
+    var days = await fetchWxData();
+    var rangeDays = days.filter(function(d) { return d.date >= startStr && d.date <= endStr; });
+    if (!rangeDays.length) {
+      card.innerHTML = '<div class="wx-error">Selected dates are outside the 14-day forecast window.</div>';
+      return;
+    }
+    renderWxStrip(days, startStr, endStr);
+    renderWxRangeCard(rangeDays);
+  } catch(e) {
+    card.innerHTML = '<div class="wx-error">Could not load forecast. Check your connection.</div>';
+  }
+}
+
+function initWxSection() {
+  // standalone weather section removed — weather now lives inside each Trip
+}
+
+// =====================================================================
 // USER WAYPOINTS
 // =====================================================================
 var waypointModeActive = false;
@@ -2753,11 +3268,17 @@ function renderWaypoints() {
 // =====================================================================
 // SIDEBAR TOGGLE
 // =====================================================================
+var OVERFLOW_SECTIONS = ['cs-mybikes', 'cs-route', 'cs-trips'];
 function toggleSection(id) {
   var body = document.getElementById(id);
   var chevron = document.getElementById('chev-' + id);
   var collapsed = body.classList.toggle('collapsed');
   if (chevron) chevron.innerHTML = collapsed ? '&#9654;' : '&#9660;';
+  if (OVERFLOW_SECTIONS.includes(id)) {
+    body.style.overflow = 'hidden';
+    if (!collapsed) setTimeout(function() { body.style.overflow = 'visible'; }, 310);
+  }
+  if (id === 'cs-trips' && !collapsed) { initTripDates(); renderTrips(); }
 }
 
 function toggleSidebar() {
@@ -2809,6 +3330,8 @@ async function loadData() {
 // =====================================================================
 // BOOT
 // =====================================================================
+initWxSection();
+initTripDates();
 loadData();
 </script>
 <script>
