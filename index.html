@@ -1754,8 +1754,8 @@ function applyFilters() {
 // ROUTE MANAGEMENT
 // =====================================================================
 function toggleSegment(seg) {
-  // Roads: select/deselect all sub-segments of the same parent road at once
-  if (seg.isRoad && seg.parentSegId) {
+  // Select/deselect all sub-segments of the same parent trail or road at once
+  if (seg.parentSegId) {
     var siblings = allSegs.filter(function(s) { return s.parentSegId === seg.parentSegId; });
     var allSelected = siblings.every(function(s) { return selectedSet.has(s.id); });
     siblings.forEach(function(s) {
