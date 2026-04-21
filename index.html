@@ -417,6 +417,19 @@
       --md-filled-icon-button-focus-icon-color: #e06c00;
     }
 
+    /* -- GPS LOCATE --------------------------------------------------- */
+    .locate-btn {
+      width: 34px; height: 34px;
+      background: white; border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px;
+      border: 2px solid rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .locate-btn:hover { background: #f4f4f4; }
+    .locate-btn.active { background: #e8f4ff; border-color: #3498db; }
+
     /* -- SHARE TOAST -------------------------------------------------- */
     #share-toast {
       position: fixed; bottom: 28px; left: 50%;
@@ -1039,6 +1052,21 @@ legendCtrl.onAdd = function() {
   return d;
 };
 legendCtrl.addTo(map);
+
+// GPS Locate control
+var locateCtrl = L.Control.extend({
+  options: { position: 'topleft' },
+  onAdd: function() {
+    var btn = L.DomUtil.create('div', 'locate-btn');
+    btn.title = 'Show my location';
+    btn.innerHTML = '&#x1F4CD;';
+    L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation)
+              .on(btn, 'click', L.DomEvent.preventDefault)
+              .on(btn, 'click', locateMe);
+    return btn;
+  }
+});
+new locateCtrl().addTo(map);
 
 // Canvas renderer for all trail polylines (much faster than SVG at ~2000 segments)
 const canvasRenderer = L.canvas({ padding: 0.5 });
@@ -2093,6 +2121,38 @@ function shareRoute() {
     document.body.removeChild(ta);
     showShareToast();
   }
+}
+
+// =====================================================================
+// GPS LOCATE
+// =====================================================================
+var _locateMarker = null;
+var _locateCircle = null;
+
+function locateMe() {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  var btn = document.querySelector('.locate-btn');
+  if (btn) btn.classList.add('active');
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      var acc = pos.coords.accuracy;
+      if (_locateMarker) { map.removeLayer(_locateMarker); map.removeLayer(_locateCircle); }
+      _locateCircle = L.circle([lat, lng], { radius: acc, color: '#3498db', fillColor: '#3498db', fillOpacity: 0.15, weight: 1 }).addTo(map);
+      _locateMarker = L.circleMarker([lat, lng], { radius: 8, color: 'white', fillColor: '#3498db', fillOpacity: 1, weight: 2 }).addTo(map);
+      map.setView([lat, lng], 15);
+      if (btn) btn.classList.remove('active');
+    },
+    function(err) {
+      if (btn) btn.classList.remove('active');
+      alert('Could not get your location: ' + err.message);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 function showShareToast() {
