@@ -2424,15 +2424,41 @@ function findLoop(startKey, targetMiles, allowed) {
     if (budget <= 0) continue;
     var ret = loopDijkstra(graph, currentKey, startKey, budget, allowed);
     if (ret) {
+      var allIds = pathSegs.concat(ret.segIds);
       var total = totalMiles + ret.miles;
-      if (total >= targetMiles * 0.3) { // accept any loop at least 30% of target
-        candidates.push({ segIds: pathSegs.concat(ret.segIds), miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
+      if (total >= targetMiles * 0.3 && loopIsConnected(allIds)) {
+        candidates.push({ segIds: allIds, miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
       }
     }
   }
   if (!candidates.length) return null;
   candidates.sort(function(a, b) { return a.diff - b.diff; });
   return candidates[0];
+}
+
+function loopIsConnected(segIds) {
+  if (segIds.length < 2) return true;
+  for (var i = 0; i < segIds.length - 1; i++) {
+    var a = allSegsMap.get(segIds[i]);
+    var b = allSegsMap.get(segIds[i + 1]);
+    if (!a || !b) return false;
+    var as = snapKey(a.coords[0]);
+    var ae = snapKey(a.coords[a.coords.length - 1]);
+    var bs = snapKey(b.coords[0]);
+    var be = snapKey(b.coords[b.coords.length - 1]);
+    if (as !== bs && as !== be && ae !== bs && ae !== be) return false;
+  }
+  // Check last segment connects back to first (closes the loop)
+  var first = allSegsMap.get(segIds[0]);
+  var last  = allSegsMap.get(segIds[segIds.length - 1]);
+  if (first && last) {
+    var fs = snapKey(first.coords[0]);
+    var fe = snapKey(first.coords[first.coords.length - 1]);
+    var ls = snapKey(last.coords[0]);
+    var le = snapKey(last.coords[last.coords.length - 1]);
+    if (fs !== ls && fs !== le && fe !== ls && fe !== le) return false;
+  }
+  return true;
 }
 
 function runLoopPlanner() {
@@ -2486,17 +2512,31 @@ function runLoopPlanner() {
 function highlightLoopPreview(segIds) {
   segIds.forEach(function(id) {
     var seg = allSegsMap.get(id);
-    if (seg && seg.layer) seg.layer.setStyle({ color: '#9b59b6', weight: 5, opacity: 0.85 });
+    if (!seg || !seg.layer) return;
+    if (!trailGroup.hasLayer(seg.layer)) trailGroup.addLayer(seg.layer);
+    seg.layer.setStyle({ color: '#9b59b6', weight: 5, opacity: 0.85 });
   });
 }
 
 function clearLoopPreview() {
   if (!_loopPreview.length) return;
+  var show = {
+    easiest:  document.getElementById('f-easy').checked,
+    moderate: document.getElementById('f-mod').checked,
+    difficult:document.getElementById('f-hard').checked,
+    road:     document.getElementById('f-road').checked,
+  };
   _loopPreview.forEach(function(id) {
     var seg = allSegsMap.get(id);
-    if (seg && seg.layer) {
-      var inRoute = selectedSet.has(id);
-      seg.layer.setStyle({ color: inRoute ? '#e06c00' : seg.color, weight: inRoute ? 5 : diffWeight(seg.difficulty) });
+    if (!seg || !seg.layer) return;
+    var inRoute = selectedSet.has(id);
+    if (inRoute) {
+      seg.layer.setStyle({ color: '#e06c00', weight: 5 });
+    } else {
+      seg.layer.setStyle({ color: seg.color, weight: diffWeight(seg.difficulty) });
+      if (!show[seg.difficulty] && trailGroup.hasLayer(seg.layer)) {
+        trailGroup.removeLayer(seg.layer);
+      }
     }
   });
 }
