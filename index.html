@@ -2396,18 +2396,19 @@ function loopDijkstra(graph, startKey, endKey, maxMiles, allowed) {
 function findLoop(startKey, targetMiles, allowed) {
   var graph = buildLoopGraph();
   var candidates = [];
-  for (var attempt = 0; attempt < 12; attempt++) {
+  // Vary walk target across attempts so we find loops of different sizes
+  var walkTargets = [0.75, 0.65, 0.55, 0.70, 0.60, 0.50, 0.75, 0.65, 0.55, 0.70, 0.60, 0.50,
+                     0.75, 0.65, 0.55, 0.45, 0.70, 0.60, 0.50, 0.40];
+  for (var attempt = 0; attempt < 20; attempt++) {
+    var walkTarget = walkTargets[attempt] || 0.65;
     var visited = {}, pathSegs = [], currentKey = startKey, totalMiles = 0, steps = 0;
-    while (totalMiles < targetMiles * 0.70 && steps < 1200) {
+    while (totalMiles < targetMiles * walkTarget && steps < 1200) {
       steps++;
       var edges = (graph[currentKey] || []).filter(function(e) {
         return !visited[e.seg.id] && allowed[e.seg.difficulty];
       });
-      // If stuck on unvisited edges, allow revisits to keep exploring
-      if (!edges.length) {
-        edges = (graph[currentKey] || []).filter(function(e) { return allowed[e.seg.difficulty]; });
-        if (!edges.length) break;
-      }
+      // Stop walk when stuck — no revisits, keeps path fully connected
+      if (!edges.length) break;
       // Fisher-Yates shuffle
       for (var i = edges.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -2424,7 +2425,9 @@ function findLoop(startKey, targetMiles, allowed) {
     var ret = loopDijkstra(graph, currentKey, startKey, budget, allowed);
     if (ret) {
       var total = totalMiles + ret.miles;
-      candidates.push({ segIds: pathSegs.concat(ret.segIds), miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
+      if (total >= targetMiles * 0.3) { // accept any loop at least 30% of target
+        candidates.push({ segIds: pathSegs.concat(ret.segIds), miles: total, diff: Math.abs(total - targetMiles) / targetMiles });
+      }
     }
   }
   if (!candidates.length) return null;
