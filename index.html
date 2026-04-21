@@ -1826,29 +1826,6 @@ function getConnectedRun(seg) {
 }
 
 function toggleSegment(seg) {
-  // Select the connected run of same-parent segments between real trail junctions
-  if (seg.parentSegId) {
-    var run = getConnectedRun(seg);
-    var allSel = run.every(function(s) { return selectedSet.has(s.id); });
-    run.forEach(function(s) {
-      if (allSel) {
-        selectedSet.delete(s.id);
-        routeOrder = routeOrder.filter(function(id) { return id !== s.id; });
-      } else if (!selectedSet.has(s.id)) {
-        selectedSet.add(s.id);
-        routeOrder.push(s.id);
-      }
-      if (s.layer) {
-        var sel = selectedSet.has(s.id);
-        s.layer.setStyle({ color: sel ? C.selected : s.color, weight: sel ? 6 : diffWeight(s.difficulty) });
-        if (sel) s.layer.bringToFront();
-      }
-    });
-    updateStats();
-    renderList();
-    return;
-  }
-
   if (selectedSet.has(seg.id)) {
     selectedSet.delete(seg.id);
     routeOrder = routeOrder.filter(function(id) { return id !== seg.id; });
