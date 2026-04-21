@@ -662,7 +662,7 @@
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <md-filled-icon-button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9664;</md-filled-icon-button>
+  <md-filled-icon-button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">&#9654;</md-filled-icon-button>
   <div id="sidebar-inner">
 
     <!-- Header -->
@@ -2252,7 +2252,7 @@ function toggleSidebar() {
   var sidebar = document.getElementById('sidebar');
   var btn     = document.getElementById('sidebar-toggle');
   var collapsed = sidebar.classList.toggle('collapsed');
-  btn.innerHTML = collapsed ? '&#9654;' : '&#9664;';
+  btn.innerHTML = collapsed ? '&#9664;' : '&#9654;';
   setTimeout(function() { map.invalidateSize(); }, 260);
 }
 
