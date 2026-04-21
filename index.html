@@ -417,6 +417,21 @@
       --md-filled-icon-button-focus-icon-color: #e06c00;
     }
 
+    /* -- ELEVATION PROFILE -------------------------------------------- */
+    .elev-label {
+      font-size: 11px; font-weight: 600; color: #888;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+    }
+    .elev-loading { font-size: 11px; color: #aaa; text-align: center; padding: 10px 0; }
+    #elev-chart { border-radius: 4px; }
+    .elev-stats {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 5px; font-size: 11px; color: #666;
+    }
+    .elev-stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .elev-stat-val { font-size: 13px; font-weight: 600; color: #333; }
+    .elev-stat-lbl { font-size: 10px; color: #999; margin-top: 1px; }
+
     /* -- GPS LOCATE --------------------------------------------------- */
     .locate-btn {
       width: 34px; height: 34px;
@@ -779,6 +794,14 @@
                 </div>
               </div>
             </div>
+            <!-- Elevation Profile -->
+            <div id="elev-section" style="display:none;margin-top:12px;">
+              <div class="elev-label">Elevation Profile</div>
+              <div id="elev-loading" class="elev-loading">Fetching elevation data…</div>
+              <svg id="elev-chart" width="100%" height="72" style="display:none;"></svg>
+              <div id="elev-stats" class="elev-stats"></div>
+            </div>
+
             <div style="margin-top:10px;">
               <div class="empty-state" id="empty-msg">
                 <div class="icon">&#x1F5FA;&#xFE0F;</div>
@@ -1755,6 +1778,7 @@ function updateStats() {
   }
 
   renderRangeWarning();
+  updateElevation();
 
   // Difficulty breakdown
   var bd = document.getElementById('diff-breakdown');
@@ -1770,6 +1794,121 @@ function updateStats() {
     el.style.display = val > 0 ? 'flex' : 'none';
     document.getElementById(pair[0] + '-val').textContent = val.toFixed(1) + ' mi';
   });
+}
+
+// =====================================================================
+// ELEVATION PROFILE
+// =====================================================================
+var _elevTimer = null;
+
+function updateElevation() {
+  var section = document.getElementById('elev-section');
+  var chart   = document.getElementById('elev-chart');
+  var loading = document.getElementById('elev-loading');
+  var stats   = document.getElementById('elev-stats');
+
+  if (!routeOrder.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  chart.style.display = 'none';
+  loading.style.display = 'block';
+  stats.innerHTML = '';
+
+  clearTimeout(_elevTimer);
+  _elevTimer = setTimeout(function() {
+    // Collect all coords in route order
+    var allCoords = [];
+    routeOrder.forEach(function(id) {
+      var seg = allSegsMap.get(id);
+      if (seg && seg.coords) {
+        seg.coords.forEach(function(c) { allCoords.push(c); }); // [lng, lat]
+      }
+    });
+    if (!allCoords.length) return;
+
+    // Sample up to 60 evenly-spaced points
+    var MAX = 60;
+    var sampled = [];
+    if (allCoords.length <= MAX) {
+      sampled = allCoords;
+    } else {
+      var step = (allCoords.length - 1) / (MAX - 1);
+      for (var i = 0; i < MAX; i++) {
+        sampled.push(allCoords[Math.round(i * step)]);
+      }
+    }
+
+    var locations = sampled.map(function(c) { return c[1] + ',' + c[0]; }).join('|');
+    fetch('https://api.opentopodata.org/v1/ned10m?locations=' + locations)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.results) throw new Error('no results');
+        var elevs = data.results.map(function(r) { return r.elevation || 0; });
+        renderElevChart(elevs);
+      })
+      .catch(function() {
+        loading.textContent = 'Elevation data unavailable.';
+      });
+  }, 700);
+}
+
+function renderElevChart(elevs) {
+  var chart   = document.getElementById('elev-chart');
+  var loading = document.getElementById('elev-loading');
+  var stats   = document.getElementById('elev-stats');
+
+  var W = chart.parentElement.clientWidth || 240;
+  var H = 72;
+  var PAD = { top: 6, bottom: 4, left: 2, right: 2 };
+
+  var minE = Math.min.apply(null, elevs);
+  var maxE = Math.max.apply(null, elevs);
+  var range = maxE - minE || 1;
+
+  // Elevation gain/loss
+  var gain = 0, loss = 0;
+  for (var i = 1; i < elevs.length; i++) {
+    var d = elevs[i] - elevs[i - 1];
+    if (d > 0) gain += d; else loss += -d;
+  }
+
+  // Build SVG points
+  var pts = elevs.map(function(e, i) {
+    var x = PAD.left + (i / (elevs.length - 1)) * (W - PAD.left - PAD.right);
+    var y = PAD.top + (1 - (e - minE) / range) * (H - PAD.top - PAD.bottom);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  });
+
+  var polyPts = pts.join(' ');
+  var firstX = PAD.left.toFixed(1);
+  var lastX  = (W - PAD.right).toFixed(1);
+  var baseY  = (H - PAD.bottom).toFixed(1);
+  var fillPts = firstX + ',' + baseY + ' ' + polyPts + ' ' + lastX + ',' + baseY;
+
+  chart.setAttribute('width', W);
+  chart.setAttribute('height', H);
+  chart.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  chart.innerHTML =
+    '<defs>' +
+      '<linearGradient id="elev-grad" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#e06c00" stop-opacity="0.35"/>' +
+        '<stop offset="100%" stop-color="#e06c00" stop-opacity="0.05"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+    '<polygon points="' + fillPts + '" fill="url(#elev-grad)"/>' +
+    '<polyline points="' + polyPts + '" fill="none" stroke="#e06c00" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>';
+
+  var toFt = function(m) { return Math.round(m * 3.28084); };
+  stats.innerHTML =
+    '<div class="elev-stat"><span class="elev-stat-val">' + toFt(maxE).toLocaleString() + ' ft</span><span class="elev-stat-lbl">Max</span></div>' +
+    '<div class="elev-stat"><span class="elev-stat-val">' + toFt(minE).toLocaleString() + ' ft</span><span class="elev-stat-lbl">Min</span></div>' +
+    '<div class="elev-stat"><span class="elev-stat-val" style="color:#2ecc71">+' + toFt(gain).toLocaleString() + ' ft</span><span class="elev-stat-lbl">Gain</span></div>' +
+    '<div class="elev-stat"><span class="elev-stat-val" style="color:#e74c3c">-' + toFt(loss).toLocaleString() + ' ft</span><span class="elev-stat-lbl">Loss</span></div>';
+
+  loading.style.display = 'none';
+  chart.style.display = 'block';
 }
 
 function renderList() {
