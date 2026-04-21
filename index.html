@@ -1753,13 +1753,57 @@ function applyFilters() {
 // =====================================================================
 // ROUTE MANAGEMENT
 // =====================================================================
+
+// Returns the contiguous run of same-parent segments between real junctions.
+// Extends from clicked seg in both directions, stopping when a node connects
+// to a DIFFERENT parent trail (a real rider decision point).
+function getConnectedRun(seg) {
+  var graph = buildLoopGraph();
+  var parent = seg.parentSegId;
+  var result = [seg];
+  var inResult = {};
+  inResult[seg.id] = true;
+
+  var endpoints = [
+    snapKey(seg.coords[0]),
+    snapKey(seg.coords[seg.coords.length - 1])
+  ];
+
+  endpoints.forEach(function(startNode) {
+    var node = startNode;
+    var prevId = seg.id;
+    for (var step = 0; step < 500; step++) {
+      // Stop if this node connects to a different-parent trail (real junction)
+      var hasDifferentParent = (graph[node] || []).some(function(e) {
+        return e.seg.parentSegId !== parent;
+      });
+      if (hasDifferentParent) break;
+
+      // Find next same-parent connected segment (not already in result)
+      var next = (graph[node] || []).filter(function(e) {
+        return e.seg.parentSegId === parent && !inResult[e.seg.id];
+      });
+      if (next.length === 0) break;
+
+      // Pick the one that isn't the segment we just came from
+      var edge = next[0];
+      inResult[edge.seg.id] = true;
+      result.push(edge.seg);
+      node = edge.to;
+      prevId = edge.seg.id;
+    }
+  });
+
+  return result;
+}
+
 function toggleSegment(seg) {
-  // Select/deselect all sub-segments of the same parent trail or road at once
+  // Select the connected run of same-parent segments between real trail junctions
   if (seg.parentSegId) {
-    var siblings = allSegs.filter(function(s) { return s.parentSegId === seg.parentSegId; });
-    var allSelected = siblings.every(function(s) { return selectedSet.has(s.id); });
-    siblings.forEach(function(s) {
-      if (allSelected) {
+    var run = getConnectedRun(seg);
+    var allSel = run.every(function(s) { return selectedSet.has(s.id); });
+    run.forEach(function(s) {
+      if (allSel) {
         selectedSet.delete(s.id);
         routeOrder = routeOrder.filter(function(id) { return id !== s.id; });
       } else if (!selectedSet.has(s.id)) {
