@@ -1840,19 +1840,20 @@ function updateElevation() {
       }
     }
 
-    var locations = sampled.map(function(c) { return c[1] + ',' + c[0]; }).join('|');
+    var lats = sampled.map(function(c) { return c[1]; }).join(',');
+    var lngs = sampled.map(function(c) { return c[0]; }).join(',');
+    var url  = 'https://api.open-meteo.com/v1/elevation?latitude=' + lats + '&longitude=' + lngs;
     var ctrl = new AbortController();
     var timeoutId = setTimeout(function() { ctrl.abort(); }, 10000);
-    fetch('https://api.opentopodata.org/v1/ned10m?locations=' + locations, { signal: ctrl.signal })
+    fetch(url, { signal: ctrl.signal })
       .then(function(r) {
         clearTimeout(timeoutId);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
       .then(function(data) {
-        if (!data.results || !data.results.length) throw new Error(data.status || 'no results');
-        var elevs = data.results.map(function(r) { return r.elevation != null ? r.elevation : null; })
-                                .filter(function(e) { return e !== null; });
+        if (!data.elevation || !data.elevation.length) throw new Error('no data');
+        var elevs = data.elevation.filter(function(e) { return e != null; });
         if (!elevs.length) throw new Error('null elevations');
         renderElevChart(elevs);
       })
