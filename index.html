@@ -1635,7 +1635,6 @@ function renderAll(segs) {
   renderRoadLabels();
   renderSavedRoutes();
   renderGarage();
-  renderRangeWarning();
   renderWaypoints();
   loadRouteFromHash();
 }
@@ -2001,7 +2000,6 @@ function updateStats() {
     document.getElementById('st-time').textContent = '—';
   }
 
-  renderRangeWarning();
   updateElevation();
 
   // Difficulty breakdown
@@ -2438,8 +2436,10 @@ function initTripDates() {
   var fmt = function(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); };
   var todayStr = fmt(today);
   var end = new Date(today); end.setDate(today.getDate() + 2);
-  document.getElementById('trip-start-input').value = todayStr;
-  document.getElementById('trip-end-input').value = fmt(end);
+  var s = document.getElementById('trip-start-input');
+  var e = document.getElementById('trip-end-input');
+  if (s) s.value = todayStr;
+  if (e) e.value = fmt(end);
 }
 
 function createTrip() {
