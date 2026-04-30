@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Winom-Frazier OHV Test</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; }
+    #map { width: 100vw; height: 100vh; }
+    #info {
+      position: fixed; top: 12px; left: 12px; z-index: 1000;
+      background: rgba(255,255,255,0.95); border-radius: 8px;
+      padding: 12px 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      font-size: 13px; max-width: 260px;
+    }
+    #info h2 { font-size: 15px; margin-bottom: 6px; color: #e06c00; }
+    #info p  { color: #555; margin-bottom: 3px; }
+    .legend { margin-top: 10px; }
+    .leg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; font-size: 11px; }
+    .leg-line { width: 28px; height: 4px; border-radius: 2px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div id="info">
+  <h2>Winom-Frazier OHV</h2>
+  <p id="status">Loading trail data…</p>
+  <p id="count"></p>
+  <div class="legend">
+    <div class="leg-row"><div class="leg-line" style="background:#e06c00"></div>ATV + Motorcycle (yearlong)</div>
+    <div class="leg-row"><div class="leg-line" style="background:#3498db"></div>ATV + Motorcycle (seasonal)</div>
+    <div class="leg-row"><div class="leg-line" style="background:#2ecc71"></div>Motorcycle only</div>
+    <div class="leg-row"><div class="leg-line" style="background:#888"></div>Other / unknown</div>
+  </div>
+</div>
+<div id="map"></div>
+<script>
+var map = L.map('map').setView([45.07, -118.65], 12);
+
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Esri', maxZoom: 18
+}).addTo(map);
+
+function trailColor(props) {
+  var moto = props.motorcycle === 'open';
+  var atv  = props.atv === 'open';
+  var seasonal = props.seasonal === 'seasonal';
+  if (moto && atv) return seasonal ? '#3498db' : '#e06c00';
+  if (moto) return '#2ecc71';
+  if (atv)  return '#f39c12';
+  return '#888';
+}
+
+fetch('winom-frazier-test.geojson')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    document.getElementById('status').textContent = 'Loaded successfully';
+    document.getElementById('count').textContent = data.features.length + ' trail segments';
+
+    var layer = L.geoJSON(data, {
+      style: function(feature) {
+        return {
+          color: trailColor(feature.properties),
+          weight: 2.5,
+          opacity: 0.85
+        };
+      },
+      onEachFeature: function(feature, layer) {
+        var p = feature.properties;
+        layer.bindTooltip(
+          '<b>' + (p.name || 'Unknown') + '</b><br>' +
+          (p.mvum_symbol_name || '') + '<br>' +
+          (p.gis_miles ? p.gis_miles.toFixed(2) + ' mi' : '') +
+          (p.motorcycle_datesopen ? '<br>Moto: ' + p.motorcycle_datesopen : '') +
+          (p.atv_datesopen ? '<br>ATV: ' + p.atv_datesopen : ''),
+          { sticky: true }
+        );
+      }
+    }).addTo(map);
+
+    map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+  })
+  .catch(function(e) {
+    document.getElementById('status').textContent = 'Error: ' + e.message;
+  });
+</script>
+</body>
+</html>
